@@ -1,0 +1,436 @@
+:root {
+
+  --bg-0: #0e0f1a;
+  --bg-1: #161829;
+  --bg-2: #1f2238;
+  --bg-3: #2a2d48;
+  --line-1: #000000;
+  --line-2: #3a3d63;
+
+  --fg-0: #fdf6e3;
+  --fg-1: #d5d8f0;
+  --fg-2: #b0b4d4;
+  --fg-3: #9296bd;
+
+  --fg-faint: #6a6d95;
+
+  --accent: #5cc6ff;
+  --accent-bg: rgba(92, 198, 255, 0.16);
+  --accent-fg: #0e0f1a;
+
+  --pos: #7be08a;
+  --neg: #ff5b6e;
+  --neg-bg: rgba(255, 91, 110, 0.16);
+  --warn: #ffcf5c;
+  --warn-bg: rgba(255, 207, 92, 0.16);
+  --info: #5cc6ff;
+  --info-bg: rgba(92, 198, 255, 0.14);
+  --reserve: #c58cff;
+
+  --ff-sans: "Silkscreen", system-ui, sans-serif;
+  --ff-mono: "Departure Mono", ui-monospace, monospace;
+
+  --fz-9: 11px; --fz-8: 11px; --fz-7: 12px; --fz-6: 14px;
+  --fz-5: 15px; --fz-4: 16px; --fz-0: 44px;
+
+  --s-1: 2px; --s-2: 4px; --s-3: 6px; --s-4: 8px;
+  --s-5: 12px; --s-6: 16px; --s-7: 20px; --s-8: 24px; --s-9: 32px;
+
+
+  --z-sticky: 10;
+  --z-scanline: 30;
+  --z-layer: 50;
+  --z-modal: 55;
+  --z-toast: 60;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+  transition: background-color 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease, fill 0.15s ease, stroke 0.15s ease;
+}
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  background: var(--bg-0); color: var(--fg-0);
+  font-family: var(--ff-mono); font-size: var(--fz-6); line-height: 1.45;
+  font-feature-settings: "ss01", "cv11", "tnum";
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+#root { height: 100%; display: flex; flex-direction: column; }
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+input, select, textarea { font: inherit; color: inherit; }
+
+.mono { font-family: var(--ff-mono); font-feature-settings: "tnum","zero","ss01"; letter-spacing: -0.01em; white-space: nowrap; }
+.num { font-family: var(--ff-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
+.wrap { word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; }
+
+/* Scrollbar visível: é a única pista de que uma região rola. Thumb em tom
+   médio (não no preto-hairline, que sumia no tema escuro). */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-0); }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border: 2px solid var(--bg-0); }
+::-webkit-scrollbar-thumb:hover { background: var(--fg-faint); }
+* { scrollbar-color: var(--bg-3) var(--bg-0); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.input, .select {
+  width: 100%; background: var(--bg-0); border: 1px solid var(--line-1); padding: 8px 10px; color: var(--fg-0);
+  font-size: var(--fz-6); outline: none; transition: border-color 0.12s, background 0.12s;
+}
+.input:focus, .select:focus { border-color: var(--accent); background: var(--bg-1); box-shadow: 0 0 0 3px var(--accent-bg); }
+.input::placeholder { color: var(--fg-3); }
+select.select {
+  appearance: none; padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23666' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+
+/* Botão vive só em pixel-ui.css (.px-btn). */
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; background: var(--bg-2); border: 1px solid var(--line-1);
+  font-size: var(--fz-9); font-weight: 500; color: var(--fg-1); letter-spacing: 0.02em;
+}
+
+.data-tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 6px; font-size: var(--fz-8); font-weight: 500;
+  color: var(--fg-2); background: transparent;
+  border: 1px solid var(--line-2);
+  white-space: nowrap;
+}
+button.data-tag { cursor: pointer; transition: all 0.12s; }
+button.data-tag:hover { border-color: var(--fg-2); color: var(--fg-0); background: var(--bg-2); }
+
+.grid-table { width: 100%; border-collapse: collapse; font-size: var(--fz-7); }
+.grid-table th {
+  text-align: left; font-weight: 600; color: var(--fg-2);
+  font-size: var(--fz-8); text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 6px 8px; border-bottom: 1px solid var(--line-1);
+  background: var(--bg-1); position: sticky; top: 0; z-index: 1;
+}
+.grid-table td { padding: 6px 8px; border-bottom: 1px solid var(--line-1); color: var(--fg-1); vertical-align: middle; }
+.grid-table th:first-child, .grid-table td:first-child { padding-left: 12px; }
+.grid-table th:last-child, .grid-table td:last-child { padding-right: 12px; }
+.grid-table tr:last-child td { border-bottom: none; }
+.grid-table tr:hover td { background: var(--bg-2); }
+.grid-table .num { color: var(--fg-0); text-align: right; white-space: nowrap; }
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }
+.toast { animation: toast-in 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+
+.nav-btn {
+  display: flex; align-items: center; gap: 5px; padding: 5px 10px; font-size: var(--fz-7); font-weight: 500;
+  color: var(--fg-2); background: transparent; border: 1px solid transparent;
+  white-space: nowrap; transition: all 0.12s;
+}
+.nav-btn:hover { color: var(--fg-0); background: var(--bg-2); }
+.nav-btn.active { color: var(--fg-0); background: var(--bg-2); border-color: var(--line-2); font-weight: 600; box-shadow: inset 0 -2px 0 var(--accent); }
+
+
+.v3-topbar {
+  height: 52px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 16px; padding: 0 24px;
+  background: var(--bg-0); border-bottom: 1px solid var(--line-1);
+  position: sticky; top: 0; z-index: var(--z-sticky);
+}
+
+.month-nav { display: flex; align-items: center; gap: 2px; }
+.month-nav-btn {
+  width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: var(--fg-2); font-size: 15px;
+  transition: background 0.12s, color 0.12s;
+}
+.month-nav-btn:hover:not(:disabled) { background: var(--bg-2); color: var(--fg-0); }
+.month-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.month-nav-label {
+  min-width: 122px; text-align: center; font-size: 13px; font-weight: 700;
+  color: var(--fg-0); letter-spacing: -0.01em; white-space: nowrap;
+}
+.month-nav-today {
+  margin-left: 4px; padding: 3px 10px;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid color-mix(in oklch, var(--accent) 30%, transparent);
+  transition: background 0.12s;
+}
+.month-nav-today:hover { background: color-mix(in oklch, var(--accent) 20%, transparent); }
+
+/* HUD da barra superior — estado do ledger, não dinheiro. Fica no canto, em
+   tom apagado: só a cor do LED muda quando algo precisa de atenção. */
+.hud { display: flex; align-items: center; gap: var(--s-4); flex-shrink: 0; }
+.hud-chip {
+  display: inline-flex; align-items: center; gap: var(--s-3);
+  padding: 3px var(--s-4);
+  font-family: var(--ff-mono); font-size: var(--fz-9); color: var(--fg-3);
+  background: var(--bg-1); border: 1px solid var(--line-1);
+  white-space: nowrap; cursor: default;
+}
+.hud-led { width: 7px; height: 7px; flex-shrink: 0; }
+
+/* Chip que GRITA: o ledger perdeu um mês inteiro. Mesma caixa do chip normal —
+   o que muda é o peso. Fonte de título em caixa alta, a cor do estado no texto
+   e na borda, e o LED piscando em `steps()` (o tema é pixel; um fade suave seria
+   a única coisa na tela que não é). */
+.hud-chip--alerta {
+  font-family: var(--ff-sans); letter-spacing: 0.08em;
+  color: var(--neg); border-color: var(--neg); background: var(--neg-bg);
+  cursor: help;
+}
+.hud-chip--alerta .hud-led { animation: hud-alerta 1.1s steps(2, end) infinite; }
+/* Um mês só ainda é âmbar: é atraso, não abandono. */
+.hud-chip--due { color: var(--warn); border-color: var(--warn); background: var(--warn-bg); }
+.hud-chip--due .hud-led { background: var(--warn) !important; }
+@keyframes hud-alerta { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.15; } }
+@media (prefers-reduced-motion: reduce) { .hud-chip--alerta .hud-led { animation: none; } }
+@media (max-width: 1024px) { .hud { display: none; } }
+
+.kpi-strip {
+  position: sticky; top: 52px; z-index: var(--z-sticky);
+  display: grid; grid-template-columns: 1.35fr 1fr 1fr 0.95fr;
+  background: var(--bg-1);
+}
+.kpi-hero {
+  background: linear-gradient(145deg, color-mix(in oklch, var(--accent) 8%, transparent), transparent 70%);
+}
+.kpi {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 14px 24px 12px;
+  border-right: 1px solid var(--line-1);
+  min-width: 0;
+}
+.kpi:last-child { border-right: none; }
+.kpi-label {
+  font-size: var(--fz-8); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--fg-3); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.kpi-value {
+  font-family: var(--ff-mono); font-size: 20px; font-weight: 700;
+  letter-spacing: -0.02em; line-height: 1; color: var(--fg-1); white-space: nowrap;
+}
+.kpi-hero .kpi-value { font-size: var(--fz-0); color: var(--fg-0); }
+.kpi-sub {
+  display: flex; align-items: baseline; gap: 8px 10px; flex-wrap: wrap;
+  font-size: 11px; color: var(--fg-3);
+}
+.kpi-delta { font-family: var(--ff-mono); font-weight: 700; font-size: 11px; }
+
+.dash-main {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  gap: 10px; padding: 10px 0;
+  overflow: hidden;
+}
+/* Faixa de widgets: altura limitada com scroll próprio (scroll interno é
+   permitido; a página nunca rola). A tabela abaixo pega o resto da viewport
+   — o dado do ledger tem que ser visível sem rolar a página. */
+.widget-band {
+  flex-shrink: 0; min-height: 0;
+  max-height: 46vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+  padding-right: 2px;
+}
+.widget-row {
+  display: grid; grid-template-columns: repeat(14, 1fr);
+  gap: 10px; flex-shrink: 0; grid-auto-rows: 230px;
+}
+.wg-4 { grid-column: span 4; }
+.wg-6 { grid-column: span 6; }
+.wg-7 { grid-column: span 7; }
+@media (max-width: 1500px) {
+
+  .widget-row { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 250px; }
+  .wg-4 { grid-column: span 2; }
+  .wg-6, .wg-7 { grid-column: span 4; }
+}
+@media (max-width: 1024px) {
+
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); border-bottom: none; }
+  .kpi:nth-child(1), .kpi:nth-child(2) { border-bottom: 1px solid var(--line-1); }
+  .kpi:nth-child(2) { border-right: none; }
+  .widget-row { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 250px; }
+  .wg-4, .wg-6, .wg-7 { grid-column: span 1; }
+}
+@media (max-width: 640px) {
+
+  .v3-topbar { padding: 0 16px; gap: 8px; }
+  .kpi-strip { grid-template-columns: 1fr; }
+  .kpi { border-right: none; border-bottom: 1px solid var(--line-1); padding: 12px 16px; }
+  .kpi:last-child { border-bottom: none; }
+  .dash-main { padding: 6px 0; }
+  .widget-row { grid-template-columns: 1fr; display: flex; flex-direction: column; height: auto; gap: 6px; }
+  .widget { min-height: 250px; }
+}
+
+.widget {
+  background: var(--bg-1); border: 1px solid var(--line-1); display: flex; flex-direction: column;
+  min-width: 0; min-height: 0; overflow: hidden;
+  box-shadow: 0 4px 16px oklch(0% 0 0 / 0.12), inset 0 1px 0 color-mix(in oklch, white 3%, transparent);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s;
+}
+.widget:not(.table-widget):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px oklch(0% 0 0 / 0.18), inset 0 1px 0 color-mix(in oklch, white 5%, transparent);
+  border-color: color-mix(in oklch, var(--accent) 15%, var(--line-1));
+}
+.widget-h {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--line-1); flex-shrink: 0;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--bg-2) 40%, transparent), transparent);
+}
+.widget-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--fg-1); white-space: nowrap;
+}
+.widget-body {
+  padding: 14px; display: flex; flex-direction: column;
+  min-height: 0; flex: 1; overflow-y: auto;
+}
+
+.table-widget { flex: 1; min-height: 280px; display: flex; flex-direction: column; }
+.table-toolbar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 8px 14px; border-bottom: 1px solid var(--line-1); flex-shrink: 0;
+}
+.table-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.table-totals {
+  flex-shrink: 0; display: flex; gap: 32px; align-items: baseline;
+  padding: 8px 16px; border-top: 1px solid var(--line-2); background: var(--bg-1);
+  font-size: 11px; color: var(--fg-3);
+}
+.table-totals .mono { font-size: 14px; font-weight: 700; }
+th.sortable { cursor: pointer; user-select: none; transition: color 0.1s; }
+th.sortable:hover { color: var(--fg-0); }
+.sort-ind { margin-left: 4px; font-size: var(--fz-8); color: var(--accent); }
+
+/* Comprometido no mês: uma linha por parcela ou recorrente. Lista, não gráfico
+   — são poucos itens e cada um é um lançamento que se pode abrir. */
+.cmt-secao {
+  display: flex; align-items: baseline; gap: var(--s-4);
+  font-family: var(--ff-sans); font-size: var(--fz-9); letter-spacing: 1px;
+  text-transform: uppercase; color: var(--fg-3);
+  padding: var(--s-4) var(--s-3) var(--s-2); flex-shrink: 0;
+  border-bottom: 1px solid var(--line-2);
+}
+/* Subtotal da seção: mesma coluna do valor das linhas, senão o olho não casa
+   o total com o que ele soma. */
+.cmt-secao-total {
+  margin-left: auto; width: 108px; text-align: right;
+  letter-spacing: 0; color: var(--fg-2); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cmt-row {
+  display: flex; align-items: baseline; gap: var(--s-5);
+  width: 100%; padding: 5px var(--s-3);
+  background: none; border: none; text-align: left; cursor: pointer;
+  border-bottom: 1px dashed var(--line-1); flex-shrink: 0;
+}
+.cmt-row:hover:not(:disabled) { background: var(--bg-2); }
+.cmt-row:disabled { cursor: default; }
+.cmt-quando { font-size: var(--fz-8); color: var(--fg-3); width: 62px; flex-shrink: 0; }
+.cmt-titulo {
+  flex: 1; min-width: 0; font-size: var(--fz-7); color: var(--fg-1);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cmt-selo {
+  flex-shrink: 0; padding: 1px var(--s-3);
+  font-family: var(--ff-mono); font-size: var(--fz-9);
+  border: 1px solid; white-space: nowrap;
+}
+.cmt-valor {
+  font-size: var(--fz-7); font-weight: 700; flex-shrink: 0;
+  width: 108px; text-align: right; font-variant-numeric: tabular-nums;
+}
+.cmt-nota {
+  padding: var(--s-3) var(--s-3) 0; font-size: var(--fz-9);
+  color: var(--fg-3); flex-shrink: 0;
+}
+
+.stat-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: 5px 0; border-bottom: 1px dashed var(--line-1); font-size: 11px;
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-row .k { color: var(--fg-3); white-space: nowrap; }
+.stat-row .v { color: var(--fg-1); font-weight: 600; text-align: right; }
+
+.tl-slot {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 3px 8px;
+  border: 1px solid transparent; transition: all 0.1s; min-width: 0;
+  position: relative; /* âncora do balão de hover */
+}
+.tl-slot:hover:not(.tl-slot--empty) { background: var(--bg-2); }
+.tl-slot--empty { cursor: default; opacity: 0.35; }
+.tl-slot.picked {
+  background: var(--accent-bg);
+  border-color: color-mix(in oklch, var(--accent) 40%, transparent);
+}
+/* `flex-shrink: 0` é o que mantém a fileira alinhada. Sem ele o container das
+   barras é um item de coluna flex que encolhe até a barra mais alta daquele
+   mês — 36px num mês fraco, 52px num forte — e a sigla e o saldo abaixo
+   flutuavam junto, subindo e descendo de coluna pra coluna. A altura é uma
+   moldura fixa; quem varia é a barra dentro dela. */
+.tl-bars {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 56px; flex-shrink: 0;
+  width: 100%; justify-content: center;
+}
+/* Sem `min-height`: o piso de altura já é do domínio (`scaleBar` devolve no
+   mínimo BAR_MIN_PX para qualquer valor positivo, e exatamente 0 para "não
+   houve"). Repetir o piso aqui aplicava-o também ao zero, e mês sem dado
+   nenhum desenhava dois tracinhos que pareciam medição. */
+.tl-bar { width: 38%; max-width: 12px; }
+/* Zero MEDIDO: o mês foi contado e nada entrou (ou nada saiu). Neutro de
+   propósito — em verde ou vermelho voltaria a parecer dinheiro pouco, que é
+   justamente a leitura errada que o tracinho antigo produzia. */
+.tl-bar--zero { height: 2px; background: var(--fg-faint); opacity: 0.55; }
+/* Sigla menor que o valor: as duas em 11px competiam, e o olho batia primeiro no
+   nome do mês — que ele já sabe — em vez do número, que é o dado. */
+.tl-mon {
+  font-size: 10px; font-family: var(--ff-mono); text-transform: uppercase;
+  color: var(--fg-faint); font-weight: 500; letter-spacing: 0.06em;
+  flex-shrink: 0; line-height: 12px;
+}
+.tl-slot.picked .tl-mon { color: var(--accent); font-weight: 700; }
+/* `nowrap` é estrutural: são 12 fatias dividindo a largura do widget, então o
+   saldo do mês SEMPRE cabe apertado. Quebrando, a segunda linha empurrava o
+   slot pra baixo e encostava no vizinho — era o "+R$ / 2,6k" em duas linhas.
+   O rótulo perdeu o "R$" pelo mesmo motivo: doze repetições da mesma moeda
+   numa fileira só custam a largura que o número precisa. */
+/* O respiro vem daqui, não do `gap` do slot: barra e sigla pertencem uma à outra
+   (a sigla nomeia a barra), o saldo é a terceira informação e precisa da pausa.
+   Um `gap` maior afastaria os três por igual e a sigla soltaria da barra. */
+.tl-net {
+  font-size: var(--fz-8); font-family: var(--ff-mono); font-weight: 700;
+  white-space: nowrap; flex-shrink: 0; margin-top: 3px;
+  width: 100%; text-align: center; line-height: 14px;
+  font-variant-numeric: tabular-nums;
+  /* Trava a coluna do número na largura do maior caso ("−1,0k"): sem isto um
+     "+90" ao lado de um "+2,1k" desalinhava o centro óptico da fileira. */
+  min-width: 0; overflow: hidden; text-overflow: clip;
+}
+.tl-slot.picked .tl-net { text-shadow: 0 0 8px color-mix(in oklch, currentColor 45%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Painel do comprometido — as mesmas linhas do antigo widget, agora em drill-down. */
+.cmt-painel { display: flex; flex-direction: column; max-height: 52vh; overflow-y: auto; }
+.cmt-rodape {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: var(--s-5); padding-top: var(--s-4);
+  border-top: 1px solid var(--line-2); font-size: 12px; color: var(--fg-2);
+}
+
+

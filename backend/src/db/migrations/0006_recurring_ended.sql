@@ -1,0 +1,11 @@
+-- Encerrar uma recorrência ANTES do prazo, sem perder rastro.
+--
+-- `until_month` é o PLANO ("12x", ou nulo = sem fim). `ended_at` é o FATO
+-- ("cancelei em 12/09"). São coisas diferentes e ambas importam: sobrescrever o
+-- plano com a data do cancelamento apagaria a informação de que era sem fim, e a
+-- tela passaria a afirmar "4× no total" sobre algo que foi declarado indefinido.
+--
+-- Mesmo gesto de `accounts.closed_at` e `investments.closed_at`: soft-close, que
+-- afeta o FUTURO e nunca reescreve o que já foi observado. Desmarcar (DELETE da
+-- marca) continua existindo para o outro caso — "isto nunca foi recorrente".
+ALTER TABLE recurring_marks ADD COLUMN ended_at TEXT;

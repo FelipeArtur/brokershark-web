@@ -1,0 +1,52 @@
+html, body { background: var(--bg-0); }
+
+img { image-rendering: pixelated; }
+
+.widget, .kpi-strip, .modal, .table-widget {
+  border: 1px solid var(--line-1) !important;
+  box-shadow: none !important;
+}
+.widget:not(.table-widget):hover {
+  transform: none;
+  border-color: var(--line-2) !important;
+}
+
+.widget-title, .kpi-label, .label, .modal-title {
+  font-family: var(--ff-sans);
+  letter-spacing: 1px;
+}
+.modal-title { font-size: var(--fz-7); text-transform: uppercase; color: var(--fg-0); }
+
+#app::after {
+  content: "";
+  position: fixed; inset: 0; z-index: var(--z-scanline); pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 4px);
+}
+
+.dither-pos { background: repeating-linear-gradient(45deg, var(--pos) 0 3px, #5cbf6e 3px 6px) !important; }
+.dither-neg { background: repeating-linear-gradient(45deg, var(--neg) 0 3px, #d8455a 3px 6px) !important; }
+.facet-active { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+@keyframes bs-boot { 0% { opacity: 0; transform: scaleY(0.002); filter: brightness(3); } 40% { opacity: 1; transform: scaleY(1); } 100% { filter: none; } }
+@keyframes bs-coin { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-24px) scale(0.6); opacity: 0; } }
+
+.bs-boot { animation: bs-boot 420ms steps(6) both; }
+
+.bs-coin {
+  position: fixed; z-index: var(--z-toast); pointer-events: none;
+  font-family: var(--ff-mono); font-weight: 700; color: var(--warn);
+  animation: bs-coin 600ms steps(6) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-boot, .bs-coin { animation: none !important; }
+}
+
+.filter-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 10px; align-items: center; flex-shrink: 0; }
+.filter-chip {
+  font-family: var(--ff-mono); font-size: var(--fz-8); letter-spacing: 0;
+  color: var(--accent-fg); background: var(--accent);
+  border: 1px solid var(--line-1); padding: 3px 7px; cursor: pointer; display: inline-flex; gap: 5px; align-items: center;
+}
+.filter-chip-x { font-weight: 700; }
+.filter-chip-clear { background: var(--neg); color: var(--bg-0); }

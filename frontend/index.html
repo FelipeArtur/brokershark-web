@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrokerShark — Demonstração com dados fictícios</title>
+  <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+
+  <!-- Sem `?v=NN`: o servidor manda `Cache-Control: no-cache` em todo estático
+       (http/static.ts), então o navegador revalida a cada carga. Os números
+       eram bumpados à mão, um por arquivo, e não mudavam nada. -->
+  <link rel="stylesheet" href="/static/css/fonts.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/pixel.css" />
+  <link rel="stylesheet" href="/static/css/pixel-ui.css" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="/static/js/vendor/react.production.min.js"></script>
+  <script src="/static/js/vendor/react-dom.production.min.js"></script>
+
+  <script src="/static/js/core/api.js"></script>
+  <script src="/static/js/ui/icons.js"></script>
+  <script src="/static/js/ui/tooltip.js"></script>
+
+  <script src="/static/js/domain/money.js"></script>
+  <script src="/static/js/domain/tx-group.js"></script>
+  <script src="/static/js/domain/palette.js"></script>
+  <script src="/static/js/domain/bank.js"></script>
+  <script src="/static/js/domain/bars.js"></script>
+  <script src="/static/js/domain/month-nav.js"></script>
+  <script src="/static/js/domain/bulk.js"></script>
+  <script src="/static/js/domain/staleness.js"></script>
+  <script src="/static/js/ui/primitives.js"></script>
+  <script src="/static/js/domain/filter.js"></script>
+  <script src="/static/js/core/juice.js"></script>
+  <script src="/static/js/overlays/transaction.js"></script>
+  <script src="/static/js/overlays/import.js"></script>
+  <script src="/static/js/overlays/bulk.js"></script>
+  <script src="/static/js/overlays/categories.js"></script>
+  <script src="/static/js/overlays/accounts.js"></script>
+  <script src="/static/js/overlays/investments.js"></script>
+  <script src="/static/js/overlays/commitments.js"></script>
+  <script src="/static/js/overlays/lifetime.js"></script>
+  <script src="/static/js/screens/history.js"></script>
+  <script src="/static/js/ui/pixel-bars.js"></script>
+  <script src="/static/js/screens/dashboard.js"></script>
+  <script src="/static/js/screens/app.js"></script>
+</body>
+</html>

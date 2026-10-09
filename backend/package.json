@@ -1,0 +1,22 @@
+{
+  "name": "brokershark",
+  "version": "1.0.0",
+  "description": "Vitrine financeira local com dados inteiramente fictícios",
+  "scripts": {
+    "start": "node src/server.ts",
+    "demo": "node src/jobs/seedDemo.ts",
+    "test": "node --test \"src/**/*.test.ts\" \"../frontend/js/**/*.test.js\"",
+    "audit": "node src/jobs/audit.ts",
+    "privacy": "node ../scripts/check-public-data.mjs"
+  },
+  "keywords": ["finance", "sqlite", "typescript", "local-first"],
+  "author": "Felipe Artur",
+  "license": "SEE LICENSE IN ../LICENSE",
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

@@ -1,0 +1,399 @@
+.px-row {
+  display: flex; align-items: center; gap: var(--s-5);
+  padding: var(--s-3) var(--s-4);
+  min-height: 34px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-1);
+}
+.px-row:hover { background: var(--bg-1); }
+.px-row:last-child { border-bottom: 0; }
+
+.px-list { display: flex; flex-direction: column; }
+
+.px-swatch {
+  width: 14px; height: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line-1);
+  font-family: var(--ff-mono); font-size: var(--fz-9); line-height: 1;
+  color: var(--bg-0);
+}
+
+.px-field {
+  height: 28px; padding: 0 var(--s-4);
+  background: var(--bg-0); color: var(--fg-0);
+  border: 1px solid var(--line-2);
+  font-family: var(--ff-mono); font-size: var(--fz-7);
+  outline: none;
+}
+.px-field:focus { border-color: var(--accent); }
+select.px-field { cursor: pointer; appearance: none; padding-right: var(--s-7); }
+
+/* Botão canônico — sistema ÚNICO. A diversão pixel vive no press
+   (translate + steps) e no juice.js, nunca na moldura. */
+.px-btn {
+  height: 28px; padding: 0 var(--s-5);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-3);
+  background: var(--bg-2); color: var(--fg-0);
+  border: 1px solid var(--line-1);
+  font-family: var(--ff-sans); font-size: var(--fz-9); letter-spacing: 1px;
+  white-space: nowrap; cursor: pointer;
+  transition: transform 60ms steps(2), background 0.12s, border-color 0.12s;
+}
+.px-btn:hover { background: var(--bg-3); color: var(--fg-0); }
+.px-btn:active { transform: translate(1px, 1px); }
+.px-btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+.px-btn--primary { background: var(--accent); color: var(--accent-fg); border-color: var(--line-1); font-weight: 700; }
+.px-btn--primary:hover { background: var(--accent); filter: brightness(1.12); color: var(--accent-fg); }
+.px-btn--danger { background: var(--neg); color: var(--bg-0); }
+.px-btn--danger:hover { background: var(--neg); filter: brightness(1.12); }
+.px-btn--ghost { background: transparent; border-color: transparent; color: var(--fg-1); }
+.px-btn--ghost:hover { background: var(--bg-2); color: var(--fg-0); }
+.px-btn--sm { height: 24px; padding: 0 var(--s-4); }
+
+/* Ficha do lançamento: o que o arquivo do banco trouxe além do valor.
+   Auto-fit porque o número de campos varia por linha — parcela e categoria do
+   banco só existem em compra de cartão. */
+.ficha {
+  display: grid; gap: var(--s-5) var(--s-7);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  padding-top: var(--s-5); border-top: 1px dashed var(--line-1);
+}
+.ficha-campo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+/* `.mono` é `nowrap` por padrão — certo numa célula de tabela, errado aqui:
+   nome de arquivo de extrato passava por cima do campo vizinho. */
+.ficha-campo .mono, .ficha-bruto { white-space: normal; overflow-wrap: anywhere; }
+
+/* Seção que se abre — o `<details>` nativo com a moldura da casa. Serve pro
+   que é consequência, não centro: a lista de regras aprendidas. */
+.px-details { border-top: 1px dashed var(--line-1); padding-top: var(--s-5); }
+.px-details > summary {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: var(--s-3);
+  font-family: var(--ff-sans); font-size: var(--fz-9); letter-spacing: 1px;
+  text-transform: uppercase; color: var(--fg-2);
+  padding-bottom: var(--s-4);
+}
+.px-details > summary::-webkit-details-marker { display: none; }
+.px-details > summary::before { content: "▸"; font-family: var(--ff-mono); color: var(--fg-3); }
+.px-details[open] > summary::before { content: "▾"; }
+.px-details > summary:hover { color: var(--fg-0); }
+
+/* Cartão pendurado na conta que paga a fatura dele. Indentado e em tom menor
+   porque é subordinado: a conta guarda dinheiro, o cartão guarda dívida. */
+.acct-card {
+  display: flex; align-items: baseline; gap: var(--s-3);
+  width: 100%; padding: 3px 6px 3px 16px;
+  background: none; border: none; cursor: pointer; text-align: left;
+}
+.acct-card:hover { background: var(--bg-2); }
+.acct-card-tree {
+  font-family: var(--ff-mono); font-size: var(--fz-9);
+  color: var(--fg-faint); flex-shrink: 0;
+}
+
+.px-chip {
+  padding: 1px var(--s-3);
+  background: var(--bg-2); color: var(--fg-2);
+  border: 1px solid var(--line-1);
+  font-family: var(--ff-mono); font-size: var(--fz-9);
+  white-space: nowrap;
+}
+
+/* Controle segmentado — escolher UM entre N. Substitui .seg-control/.seg-btn e
+   .filter-pills/.filter-pill, que faziam a mesma coisa com nomes diferentes.
+   Sem modificador é inline (barra de filtro); com --fill vira grid de largura
+   cheia (formulário). */
+.px-seg {
+  display: inline-flex; gap: 2px; padding: 2px;
+  background: var(--bg-1); border: 1px solid var(--line-1);
+}
+.px-seg--fill { display: grid; gap: var(--s-2); padding: var(--s-2); background: var(--bg-0); }
+
+.px-seg-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-5);
+  font-size: var(--fz-8); font-weight: 500;
+  color: var(--fg-2); background: transparent; border: 1px solid transparent;
+  cursor: pointer; white-space: nowrap;
+}
+.px-seg-btn:hover { color: var(--fg-0); }
+.px-seg-btn.active {
+  font-weight: 600; color: var(--fg-0);
+  background: var(--bg-3); border-color: var(--line-2);
+}
+
+.px-dropzone {
+  padding: var(--s-8) var(--s-6);
+  text-align: center;
+  background: var(--bg-1);
+  border: 2px dashed var(--line-2);
+  color: var(--fg-2);
+  font-family: var(--ff-mono); font-size: var(--fz-8);
+  cursor: pointer;
+}
+.px-dropzone:hover, .px-dropzone--over {
+  border-color: var(--accent); color: var(--fg-0); background: var(--bg-2);
+}
+
+.px-steps { display: flex; align-items: center; gap: var(--s-3); }
+.px-step {
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line-1);
+  background: var(--bg-2); color: var(--fg-3);
+  font-family: var(--ff-sans); font-size: var(--fz-9);
+}
+.px-step--active { background: var(--accent); color: var(--accent-fg); }
+.px-step--done   { background: var(--pos);    color: var(--bg-0); }
+.px-step-bar { width: 16px; height: 2px; background: var(--line-2); }
+
+.px-empty {
+  padding: var(--s-9) var(--s-6);
+  text-align: center; color: var(--fg-3);
+  font-family: var(--ff-mono); font-size: var(--fz-8);
+}
+
+/* Linha de categoria — lista, não card. Ações aparecem no hover;
+   o × só fica vermelho quando o ponteiro está sobre ele. */
+.cat-row {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line-1);
+}
+.cat-row:last-child { border-bottom: 0; }
+.cat-row:hover { background: var(--bg-1); }
+.cat-name {
+  flex: 1; min-width: 0; text-align: left;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--ff-sans); font-size: var(--fz-8); letter-spacing: 1px;
+  text-transform: uppercase; color: var(--fg-0); cursor: text;
+  background: transparent; border: 0;
+}
+.cat-name:hover { color: var(--accent); }
+.cat-count {
+  flex-shrink: 0; font-family: var(--ff-mono); font-size: var(--fz-8);
+  color: var(--fg-3); white-space: nowrap;
+}
+.cat-actions {
+  flex-shrink: 0; display: flex; gap: var(--s-2);
+  opacity: 0; transition: opacity 0.12s;
+}
+.cat-row:hover .cat-actions, .cat-row:focus-within .cat-actions { opacity: 1; }
+.cat-del:hover { background: var(--neg); color: var(--bg-0); border-color: var(--neg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .px-btn { transition: none; }
+}
+
+/* ── Balão de fala ──────────────────────────────────────────────────────────
+   UM desenho de balão pra tela inteira. Havia dois: o do `title` substituído
+   (borda fina accent, sombra preta) e o do mês no gráfico (borda grossa clara,
+   sombra da linha) — mesmo gesto, dois visuais, e a tela parecia montada por
+   duas pessoas. Os tokens abaixo são a fonte única; quem desenha um balão novo
+   consome daqui em vez de escolher de novo.
+
+   O rabicho é uma ESCADA de pixels via clip-path, não um triângulo de borda: a
+   diagonal do triângulo sai suavizada e destoa de tudo o mais na tela. */
+:root {
+  --tip-bg: var(--bg-0);
+  --tip-line: var(--accent);
+  --tip-fg: var(--fg-0);
+  --tip-shadow: 4px 4px 0 0 #000;
+  --tip-pad: var(--s-3) var(--s-4);
+  --tip-tail-size: 12px;
+  /* A escada, em %: serve pra qualquer tamanho de rabicho sem recontar pixel. */
+  --tip-tail-clip: polygon(0 0, 100% 0, 100% 33.34%, 66.67% 33.34%,
+                           66.67% 66.67%, 33.34% 66.67%, 33.34% 100%, 0 100%);
+}
+
+.px-tip {
+  position: fixed; z-index: 70; pointer-events: none;
+  max-width: 280px; padding: var(--tip-pad);
+  background: var(--tip-bg);
+  color: var(--tip-fg);
+  border: 1px solid var(--tip-line);
+  font-family: var(--ff-mono); font-size: var(--fz-8); line-height: 1.45;
+  /* `pre-wrap`: o balão é mono, então quebra e espaço viram LAYOUT — um tooltip
+     alinha valores em coluna com `padStart`. Texto de uma linha não muda. */
+  white-space: pre-wrap;
+  box-shadow: var(--tip-shadow);
+  opacity: 0; visibility: hidden;
+  transition: opacity 90ms steps(3), visibility 90ms steps(3);
+}
+.px-tip[data-show="1"] { opacity: 1; visibility: visible; }
+
+/* Rabicho: UMA escada maciça na cor da borda — em pixel art o rabicho é
+   apêndice do contorno, não um triângulo com miolo. Tentei contorno + miolo
+   com dois pseudo-elementos: escadas de tamanhos diferentes nunca casam os
+   degraus em pixel inteiro, e o rabicho saía oco, parecendo artefato. */
+.px-tip::after {
+  content: ""; position: absolute;
+  width: var(--tip-tail-size); height: var(--tip-tail-size);
+  left: var(--tip-tail, 12px);
+  background: var(--tip-line);
+}
+/* Balão ACIMA: escada desce da base, larga em cima, estreitando à esquerda. */
+.px-tip[data-dir="up"]::after { top: 100%; margin-top: -1px; clip-path: var(--tip-tail-clip); }
+/* Balão ABAIXO: a mesma escada espelhada na vertical. */
+.px-tip[data-dir="down"]::after {
+  bottom: 100%; margin-bottom: -1px;
+  clip-path: polygon(0 100%, 100% 100%, 100% 66.66%, 66.67% 66.66%,
+                     66.67% 33.33%, 33.34% 33.33%, 33.34% 0, 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .px-tip { transition: none; }
+}
+
+/* Linha do resumo que abre um drill-down. Parece linha, não botão: o resumo é
+   uma CONTA, e um botão no meio dela quebraria a leitura de cima pra baixo. */
+.resumo-linha {
+  display: flex; justify-content: space-between; align-items: baseline;
+  width: 100%; margin-bottom: 2px; padding: 0;
+  background: none; border: none; text-align: left; cursor: pointer;
+  font: inherit; color: inherit;
+}
+.resumo-linha:hover { background: var(--bg-2); }
+
+/* Mês futuro na régua: alcançável, e visivelmente sem medição. O tracejado diz
+   "aqui não há dado", a mesma convenção da parcela prevista. */
+.tl-slot--futuro { cursor: pointer; opacity: 0.75; }
+.tl-slot--futuro:hover { opacity: 1; background: var(--bg-2); }
+/* O chão tracejado marca "aqui não há medição" sem fingir uma barra de altura
+   zero — que se leria como "nada entrou", e não como "ainda não aconteceu". */
+.tl-slot--futuro .tl-bars {
+  border-bottom: 1px dashed color-mix(in oklch, var(--line-2) 70%, transparent);
+}
+
+/* Painel "desde o começo": o ledger inteiro. Dois blocos grandes lado a lado —
+   o que entrou e o que virou gasto — porque é a comparação entre os dois que dá
+   o susto, não cada um sozinho. */
+.lt-periodo {
+  font-family: var(--ff-mono); font-size: var(--fz-8); color: var(--fg-3);
+  padding-bottom: var(--s-4); border-bottom: 1px solid var(--line-2); margin-bottom: var(--s-5);
+}
+.lt-periodo b { color: var(--fg-1); }
+.lt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); }
+.lt-bloco {
+  display: flex; flex-direction: column; gap: var(--s-2);
+  padding: var(--s-5); background: var(--bg-2); border: 1px solid var(--line-1);
+}
+.lt-rotulo {
+  font-family: var(--ff-sans); font-size: var(--fz-9);
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--fg-3);
+}
+.lt-valor { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.lt-nota { font-size: 10px; color: var(--fg-faint); line-height: 1.4; }
+.lt-sobra {
+  display: flex; align-items: baseline; gap: var(--s-4); flex-wrap: wrap;
+  margin-top: var(--s-5); padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--line-2); background: var(--bg-1);
+}
+.lt-sobra b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.lt-sobra .lt-nota { margin-left: auto; }
+.lt-linhas { margin-top: var(--s-5); }
+.lt-cat { display: flex; align-items: center; gap: var(--s-4); padding: 3px 0; font-size: var(--fz-8); }
+.lt-cat-nome { width: 140px; flex-shrink: 0; color: var(--fg-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lt-cat-barra { flex: 1; height: 8px; background: var(--bg-2); border: 1px solid var(--line-1); }
+.lt-cat-barra span { display: block; height: 100%; background: var(--neg); }
+.lt-cat-valor { width: 100px; text-align: right; color: var(--fg-2); font-variant-numeric: tabular-nums; }
+
+/* Prazo da recorrência: atalhos + o mês exato. Os atalhos cobrem o caso comum
+   (contrato de 6, 12, 24), o campo cobre o resto — e os dois escrevem no MESMO
+   valor, então nunca discordam sobre até quando a marca vale. */
+.rec-prazo {
+  display: flex; flex-direction: column; gap: var(--s-3);
+  padding: var(--s-4) var(--s-5); margin-top: -1px;
+  border: 1px solid color-mix(in oklch, var(--accent) 45%, transparent);
+  border-top: none; background: var(--bg-0);
+}
+.rec-prazo-opcoes { display: flex; gap: var(--s-2); flex-wrap: wrap; align-items: stretch; }
+/* O `.px-seg-btn` solto tem fundo e borda transparentes — no meio de um bloco
+   escuro ele lê como texto, não como opção clicável. Aqui cada um ganha corpo,
+   e o ativo continua sendo o único com fundo cheio. */
+.rec-prazo-opcoes .px-seg-btn {
+  border-color: var(--line-2); background: var(--bg-1); color: var(--fg-2);
+}
+.rec-prazo-opcoes .px-seg-btn:hover { border-color: var(--fg-3); color: var(--fg-0); }
+.rec-prazo-opcoes .px-seg-btn.active {
+  background: var(--accent-bg); border-color: var(--accent); color: var(--accent);
+}
+/* A caixa aparece só depois de "Outro", numa linha própria: revelar no clique é
+   o que faz o botão significar alguma coisa. */
+.rec-prazo-custom {
+  display: inline-flex; align-items: center; gap: var(--s-3); align-self: flex-start;
+  padding: 2px var(--s-4); border: 1px solid var(--accent); background: var(--bg-1);
+  font-family: var(--ff-mono); font-size: var(--fz-9); color: var(--fg-3);
+}
+.rec-prazo-custom:focus-within { border-color: var(--accent); color: var(--fg-1); }
+.rec-prazo-custom input {
+  width: 4ch; padding: 3px 0; border: none; background: none;
+  font: inherit; color: var(--fg-0); text-align: right;
+}
+.rec-prazo-custom input::placeholder { color: var(--fg-faint); }
+.rec-prazo-nota { font-size: 10px; color: var(--fg-3); line-height: 1.5; }
+
+/* "Desde o começo" no rodapé da tabela: o número da VIDA ao lado do número do
+   MÊS. É a diferença de escala que dá o susto, então ele fica no fluxo dos
+   totais — não num botão cinza encostado no canto, onde ninguém achava. */
+.table-lifetime {
+  display: inline-flex; align-items: baseline; gap: var(--s-3);
+  padding: 2px var(--s-4); margin-left: var(--s-5);
+  background: none; border: 1px solid var(--line-2);
+  border-left: 3px solid var(--fg-3);
+  cursor: pointer; font: inherit;
+}
+.table-lifetime:hover { background: var(--bg-2); border-color: var(--fg-3); }
+.table-lifetime-k {
+  font-size: 10px; color: var(--fg-3); text-transform: uppercase; letter-spacing: 0.05em;
+}
+.table-lifetime-v { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.table-lifetime-seta { font-size: 11px; color: var(--fg-3); }
+.lt-sem-cat {
+  padding: var(--s-5); background: var(--bg-2); border: 1px dashed var(--line-2);
+  font-size: var(--fz-8); color: var(--fg-2); line-height: 1.6;
+}
+.lt-sem-cat span { font-size: 10px; color: var(--fg-3); }
+
+/* Encerrar × desmarcar: dois gestos, dois lugares. Desmarcar é o toggle acima
+   ("nunca foi recorrente"); encerrar mora aqui, junto do prazo, porque é sobre
+   ATÉ QUANDO — e preserva o que já aconteceu. */
+.rec-encerrar {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding-top: var(--s-3); border-top: 1px dashed var(--line-2);
+}
+.rec-encerrada {
+  font-family: var(--ff-mono); font-size: var(--fz-9); color: var(--warn); flex: 1;
+}
+/* Ausência de medição, não medição de zero: o traço é apagado de propósito, pra
+   não competir com os meses que têm número de verdade. */
+.kpi-vazio { color: var(--fg-faint); font-weight: 500; }
+
+/* "vs ant.": o nível do mês anterior atravessa a barra. Antes era uma barra cinza
+   ao lado, e comparar exigia medir a distância entre dois objetos de altura
+   parecida — dava para ver que mudou, não para dizer se subiu. A marca some
+   quando o toggle está desligado, então ela nunca disputa espaço à toa. */
+.tl-bar { position: relative; }
+/* A marca NÃO passa da largura da barra: sangrando, duas marcas em alturas
+   parecidas viram um traço contínuo e nenhuma pertence mais a barra nenhuma. */
+.tl-mark {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: var(--fg-0); box-shadow: 0 0 0 1px var(--bg-0);
+  pointer-events: none;
+}
+/* Fora da barra: o mês anterior foi MAIOR e a linha flutua no vazio. Tracejada
+   para não ser lida como um topo de barra que não chegou até ali. */
+.tl-mark--fora {
+  background: repeating-linear-gradient(90deg,
+    var(--fg-1) 0 2px, transparent 2px 4px);
+  box-shadow: none;
+}
+/* A haste liga a marca ao topo da barra de onde ela caiu: sem ela o tracejado é
+   um objeto solto, e o vão entre os dois É a queda que se quer ler. */
+.tl-mark--fora::before {
+  content: ""; position: absolute; left: 50%; top: 2px; width: 1px;
+  height: var(--tl-queda, 0);
+  background: repeating-linear-gradient(180deg,
+    var(--fg-faint) 0 2px, transparent 2px 4px);
+}
