@@ -71,8 +71,7 @@ const KpiStrip = React.memo(function KpiStrip({ available, availErr, accounts, c
   const oculta = futuro || velha;
 
   const checkingTotal = oculta ? null : passado ? position.checking_total : (available ? available.checking_total : 0);
-  const savingsTotal = oculta ? null : passado ? (position.savings_total || 0) : (available ? available.savings_total : 0);
-  const availableTotal = oculta ? null : passado ? position.available_total : (available ? available.available_total : 0);
+  const savingsTotal = oculta ? null : passado ? (position.savings_total ?? null) : (available?.savings_total ?? null);
   const investido = oculta ? null : passado ? position.invested_total : investTotal;
   const patrimonio = oculta ? null : passado ? position.net_worth : checkingTotal + investido;
 
@@ -87,7 +86,7 @@ const KpiStrip = React.memo(function KpiStrip({ available, availErr, accounts, c
     : "em relação ao mês anterior";
 
   const committed = (!passado && !oculta && available && available.committed_this_month) ? available.committed_this_month : 0;
-  const availValue = oculta ? null : passado ? position.available_total : (available ? available.available_net : null);
+  const availValue = oculta ? null : passado ? (position.available_total ?? checkingTotal) : (available ? available.available_net : null);
   const availNeg = availValue != null && availValue < 0;
 
   const inc = cashflow ? cashflow.income_total : 0;
@@ -114,8 +113,8 @@ const KpiStrip = React.memo(function KpiStrip({ available, availErr, accounts, c
               className: "kpi-value",
               style: { color: availNeg ? "var(--neg)" : "var(--fg-0)" },
               "data-tip": passado
-                ? `Contas: ${fmtBRL(checkingTotal)} + Reserva de emergência: ${fmtBRL(savingsTotal)}`
-                : `Contas: ${fmtBRL(checkingTotal)} + Reserva de emergência: ${fmtBRL(savingsTotal)}${committed > 0 ? " − Comprometido: " + fmtBRL(committed) : ""} = ${fmtBRL(availValue)}`,
+                ? `Contas: ${fmtBRL(checkingTotal)}${savingsTotal == null ? "" : " + Reserva de emergência: " + fmtBRL(savingsTotal)}`
+                : `Contas: ${fmtBRL(checkingTotal)}${savingsTotal == null ? "" : " + Reserva de emergência: " + fmtBRL(savingsTotal)}${committed > 0 ? " − Comprometido: " + fmtBRL(committed) : ""} = ${fmtBRL(availValue)}`,
             },
               (availNeg ? "−" : "") + fmtBRL(Math.abs(availValue))),
       h("span", { className: "kpi-sub" },
