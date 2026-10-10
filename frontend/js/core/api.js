@@ -14,6 +14,7 @@ function _params(obj) {
  * @param msg   mensagem de fallback quando o servidor não mandou `error`.
  */
 async function _send(method, url, body, msg = "request failed") {
+  if (method !== "GET") throw new Error("Demonstração somente leitura: alterações e importação estão desativadas.");
   const opts = { method };
   if (body instanceof FormData) {
     opts.body = body;
@@ -29,13 +30,7 @@ async function _send(method, url, body, msg = "request failed") {
   return r.json();
 }
 
-/**
- * @brief   Leitura. NÃO rejeita em status de erro — devolve o corpo como veio.
- * @details Deliberado: as telas consomem leitura sem `.catch()`, e rejeitar trocaria
- *          "dado estranho" por "widget que nunca preenche".
- * @note    Quem precisa falhar alto usa `_send("GET", …)`.
- */
-const _get   = (url)            => fetch(url).then(r => r.json());
+const _get = url => _send("GET", url);
 const _post  = (url, body, msg) => _send("POST", url, body, msg);
 const _patch = (url, body, msg) => _send("PATCH", url, body, msg);
 const _put   = (url, body, msg) => _send("PUT", url, body, msg);
@@ -54,13 +49,16 @@ async function fetchInvestments(bank)      { return _get(`/api/investments${_par
 // Ficha da posição + snapshots datados (rendimento computado no servidor).
 // Falha alto (`_send`) porque abre num overlay dedicado: sem posição não há o
 // que desenhar, e o overlay tem onde mostrar o erro.
-async function fetchInvestment(id) {
-  return _send("GET", `/api/investments/${encodeURIComponent(id)}`, undefined, "posição não encontrada");
+async function fetchInvestment(id, month = null) {
+  const position = await _send("GET", `/api/investments/${encodeURIComponent(id)}`, undefined, "Posição não encontrada.");
+  const ym = refMonthOf(month);
+  if (ym) position.snapshots = position.snapshots.filter(s => s.ref_date.slice(0, 7) <= ym);
+  return position;
 }
 
 async function fetchAccounts(bank)         { return _get(`/api/accounts${_params({ bank })}`); }
 
-// closed=1 traz as encerradas junto — o painel de contas precisa vê-las pra
+// closed=1 traz as encerradas junto. o painel de contas precisa vê-las pra
 // poder reabrir; os widgets, não.
 async function fetchAllAccounts()          { return _get("/api/accounts?closed=1"); }
 
@@ -84,9 +82,9 @@ async function fetchCategoriesFull(flow = "expense", month) { return _get(`/api/
 async function fetchMonthTransactions({ month, year } = {}) { return _get(`/api/month-transactions${_params({ month, year })}`); }
 
 async function fetchLiquidityHistory()     { return _get("/api/liquidity-history"); }
-// Os bancos com adaptador — a tela lista daqui em vez de repetir a lista.
+// Os bancos com adaptador. a tela lista daqui em vez de repetir a lista.
 async function fetchBanks()                { return _get("/api/banks"); }
-// A posição no FIM do mês pedido — contas e carteira item a item. `/api/available`,
+// A posição no FIM do mês pedido. contas e carteira item a item. `/api/available`,
 // `/api/accounts` e `/api/investments` respondem sempre por agora; esta acompanha o
 // seletor de mês.
 async function fetchPosition({ month, year } = {}) { return _get(`/api/position${_params({ month, year })}`); }
@@ -177,5 +175,18 @@ async function importFaturaConfirm(file, dueDate = null, importBatchId = null) {
 }
 
 async function fetchInvestmentEvolution()    { return _get("/api/investment-evolution"); }
-// O ledger inteiro — a única leitura que ignora o seletor de mês de propósito.
+// O ledger inteiro. a única leitura que ignora o seletor de mês de propósito.
 async function fetchLifetime()               { return _get("/api/lifetime"); }
+
+// As leituras não têm cache; Atualizar consulta novamente os dados fictícios.
+function clearCache() {}
+function refMonthOf(month) {
+  if (!month) return null;
+  if (typeof month === "string") return month;
+  return `${month.year}-${String(month.month).padStart(2, "0")}`;
+}
+async function deleteTransactions() {
+  throw new Error("Demonstração somente leitura: exclusão desativada.");
+}
+window.BS = window.BS || {};
+window.BS.deleteTransactions = deleteTransactions;

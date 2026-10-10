@@ -3,7 +3,8 @@ import type { Req, Res } from "../http/respond.ts";
 import { json, qsStr, qsInt } from "../http/respond.ts";
 import type { Route } from "../http/router.ts";
 import { compilePath } from "../http/router.ts";
-import { currentMonth, monthRange } from "../domain/dates.ts";
+import { currentMonth, monthRange, addMonths } from "../domain/dates.ts";
+import { comprometidoDoMesCents } from "../db/committed.ts";
 import { consumptionExpense, realIncome, investmentOut, investmentIn } from "../db/ledgerSql.ts";
 
 const FLOW_SUMS = `
@@ -85,13 +86,28 @@ export function analyticsRoutes(db: DatabaseSync): Route[] {
       ORDER BY year, month
     `).all(...params) as any[];
 
-    json(res, rows.map(r => ({
+    const measured = rows.map(r => ({
       label: `${String(r.month).padStart(2, "0")}/${r.year}`,
-      month: r.month,
-      year: Number(r.year),
-      income: r.income_cents / 100,
-      expenses: r.expense_cents / 100,
-    })));
+      month: r.month, year: Number(r.year), has_data: true,
+      income: r.income_cents / 100, expenses: r.expense_cents / 100,
+    }));
+    if (present !== "1" || bank || account) return json(res, measured);
+    const {month, year} = currentMonth();
+    const current = `${year}-${String(month).padStart(2, "0")}`;
+    for (let offset = 1; offset <= 12; offset++) {
+      const ym = addMonths(current, offset);
+      const [y, m] = ym.split("-").map(Number);
+      if (!measured.some(row => row.year === y && row.month === m)) {
+        measured.push({label: `${String(m).padStart(2, "0")}/${y}`, month:m, year:y, has_data:false, income:0, expenses:0});
+      }
+    }
+    json(res, measured.map(row => {
+      const ym = `${row.year}-${String(row.month).padStart(2, "0")}`;
+      const {start, end} = monthRange(row.month, row.year);
+      const cmt = comprometidoDoMesCents(db, ym, start, end);
+      return {...row, committed:cmt.totalCents / 100, committedInvoices:cmt.faturasCents / 100,
+        committedRecurring:cmt.recorrentesCents / 100, committedInstallments:cmt.parcelasCents / 100};
+    }).sort((a,b) => a.year - b.year || a.month - b.month));
   }
 
   function getCashflowStatement(req: Req, res: Res) {

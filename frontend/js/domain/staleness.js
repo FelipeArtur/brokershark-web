@@ -16,7 +16,7 @@
    * @details Conta MESES DE CALENDÁRIO, não dias: o acervo chega mensal, então
    *          "há 29 dias" não quer dizer nada e "falta julho inteiro" quer.
    * @param   lastTxDate ISO `YYYY-MM-DD` do lançamento mais recente, ou null.
-   * @param   hoje ISO `YYYY-MM-DD` — parâmetro pra ser testável sem mexer no relógio.
+   * @param   hoje ISO `YYYY-MM-DD`. parâmetro pra ser testável sem mexer no relógio.
    * @returns `{ level, months, label }`. `level`: "ok" | "due" | "late" | "empty".
    */
   function ledgerLag(lastTxDate, hoje) {

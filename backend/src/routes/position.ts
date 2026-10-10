@@ -135,7 +135,19 @@ export function positionRoutes(db: DatabaseSync): Route[] {
       net_worth: cents(atual.checking + atual.invested),
       delta_net_worth: delta(atual.checking + atual.invested - anterior.checking - anterior.invested),
       delta_invested: delta(atual.invested - anterior.invested),
-      accounts: contas.map(a => ({
+      credit_cards: contas.filter(a => a.type === "credit_card" && (!a.closed_ym || a.closed_ym >= ym)).map(a => {
+        const invoice = db.prepare(`SELECT i.total_cents, i.due_date, t.date AS payment_date
+          FROM invoices i LEFT JOIN transactions t ON t.id = i.payment_tx_id
+          WHERE i.account_id = ? AND i.ref_month = ?`).get(a.id, ym) as any;
+        return {
+          id: a.id, bank: a.bank, type: a.type, name: a.name,
+          open_invoice: invoice ? {total: invoice.total_cents / 100, ref_month: ym} : null,
+          _invoice_paid: !!invoice?.payment_date,
+          _invoice_payment_date: invoice?.payment_date ?? null,
+          _invoice_due_date: invoice?.due_date ?? null,
+        };
+      }),
+      accounts: contas.filter(a => a.type !== "credit_card").map(a => ({
         id: a.id, bank: a.bank, type: a.type, name: a.name,
         closed_at: a.closed_ym ?? null,
         balance: cents(atual.saldos.get(a.id) ?? 0),

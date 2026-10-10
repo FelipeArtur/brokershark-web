@@ -25,6 +25,23 @@ test("suggestionPlan aguenta lista vazia e undefined", () => {
 });
 
 test("suggestionPlan trata id 0 como sugestão ausente só se for null/undefined", () => {
-
   assert.equal(B.suggestionPlan([g("a", 0)]).length, 1);
+});
+
+test("groupsByFlow separa grupos de gastos e entradas", () => {
+  const grupos = [
+    { merchant_key: "mercado", flow: "expense", count: 2 },
+    { merchant_key: "salario", flow: "income", count: 1 },
+    { merchant_key: "farmacia", flow: "expense", count: 3 },
+  ];
+  const { expense, income } = B.groupsByFlow(grupos);
+  assert.equal(expense.length, 2);
+  assert.equal(income.length, 1);
+  assert.deepEqual(expense.map(x => x.merchant_key), ["mercado", "farmacia"]);
+  assert.deepEqual(income.map(x => x.merchant_key), ["salario"]);
+});
+
+test("groupsByFlow lida com lista vazia ou nula", () => {
+  assert.deepEqual(B.groupsByFlow([]), { expense: [], income: [] });
+  assert.deepEqual(B.groupsByFlow(null), { expense: [], income: [] });
 });

@@ -78,7 +78,7 @@
   /**
    * @brief   Onde o gasto está em relação ao alvo.
    * @warning Compara em CENTAVOS INTEIROS. A API entrega reais, e somá-los em float
-   *          fazia 0,10 três vezes darem 0.30000000000000004 — um alvo de R$ 0,30
+   *          fazia 0,10 três vezes darem 0.30000000000000004. um alvo de R$ 0,30
    *          nascia "estourado" com exatamente 30 centavos gastos.
    */
   function budgetState(spent, budget) {

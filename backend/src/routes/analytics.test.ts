@@ -91,3 +91,18 @@ test("monthly: par SELF fica fora de receita e de despesa", () => {
   assert.equal(row.income, 4200);
   assert.equal(row.expenses, 1485.47);
 });
+
+test("monthly: gráfico identifica medições e mostra previsão sem inventar receita", () => {
+  const db = freshDb();
+  june(db);
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const ym = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, "0")}`;
+  db.prepare("INSERT INTO invoices (account_id,ref_month,due_date,total_cents,source_file) VALUES ('cartao-b',?,?,18000,'demo')").run(ym, `${ym}-20`);
+  const rows = get(db, "/api/monthly?present=1");
+  assert.equal(rows.find((row:any) => row.label === "06/2026").has_data, true);
+  const future = rows.find((row:any) => row.year === target.getFullYear() && row.month === target.getMonth() + 1);
+  assert.equal(future.has_data, false);
+  assert.equal(future.income, 0);
+  assert.equal(future.committed, 180);
+});

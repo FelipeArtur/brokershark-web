@@ -26,6 +26,19 @@ inventados. O gerador usa semente aleatória fixa e cobre os 24 meses terminados
 hoje. Não usa cópia anonimizada de um ledger real. Capturas antigas não estão
 incluídas.
 
+## Interface
+
+O painel reúne caixa disponível, patrimônio, resultado do mês e investimentos.
+O gráfico separa meses medidos de compromissos futuros. Navegue pelos meses,
+filtre lançamentos e abra os detalhes de contas, categorias e investimentos.
+Configurações e importação explicam o funcionamento do aplicativo, sem receber
+arquivos ou alterar dados. Fontes locais, foco por teclado e movimento reduzido
+acompanham a interface em desktop, tablet e celular.
+
+![Painel com dados fictícios](docs/demo/dashboard.png)
+
+As capturas em `docs/demo` foram geradas pela vitrine, com seu ledger fictício.
+
 ## Verificar
 
 ```bash

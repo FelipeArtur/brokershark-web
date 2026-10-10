@@ -2,7 +2,7 @@ html, body { background: var(--bg-0); }
 
 img { image-rendering: pixelated; }
 
-.widget, .kpi-strip, .modal, .table-widget {
+.widget, .kpi-strip, .table-widget {
   border: 1px solid var(--line-1) !important;
   box-shadow: none !important;
 }
@@ -11,11 +11,18 @@ img { image-rendering: pixelated; }
   border-color: var(--line-2) !important;
 }
 
-.widget-title, .kpi-label, .label, .modal-title {
+.widget-title, .kpi-label, .label {
   font-family: var(--ff-sans);
   letter-spacing: 1px;
 }
-.modal-title { font-size: var(--fz-7); text-transform: uppercase; color: var(--fg-0); }
+.widget-title::before {
+  content: "■";
+  font-size: 7px;
+  color: var(--accent);
+  margin-right: 6px;
+  vertical-align: 1px;
+  display: inline-block;
+}
 
 #app::after {
   content: "";
@@ -50,3 +57,209 @@ img { image-rendering: pixelated; }
 }
 .filter-chip-x { font-weight: 700; }
 .filter-chip-clear { background: var(--neg); color: var(--bg-0); }
+
+/* ── Tela de Carregamento Retrô (Retro Month Loader) ─────────────────────── */
+.retro-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 440px;
+  padding: var(--s-8) var(--s-5);
+  margin: 0 auto;
+  width: 100%;
+  max-width: 520px;
+}
+
+.retro-loader-box {
+  width: 100%;
+  background: var(--bg-1);
+  border: 2px solid var(--line-2);
+  box-shadow: 4px 4px 0 0 #000;
+  padding: var(--s-6) var(--s-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.retro-loader-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line-1);
+  padding-bottom: var(--s-3);
+  font-family: var(--ff-sans);
+  font-size: var(--fz-9);
+  letter-spacing: 1px;
+  color: var(--fg-3);
+  text-transform: uppercase;
+}
+
+.retro-led-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.retro-led {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  animation: retro-led-blink 800ms steps(1) infinite;
+}
+
+@keyframes retro-led-blink {
+  0%, 49% { opacity: 1; filter: brightness(1.2); }
+  50%, 100% { opacity: 0.2; filter: none; }
+}
+
+.retro-scene {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-4) var(--s-5);
+  background: var(--bg-0);
+  border: 1px solid var(--line-1);
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.retro-stage-tag {
+  font-family: var(--ff-sans);
+  font-size: 10px;
+  color: var(--fg-3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.retro-stage-title {
+  margin: 2px 0 0;
+  font-family: var(--ff-sans);
+  font-size: var(--fz-5);
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(92, 198, 255, 0.45);
+}
+
+.retro-sprite-container {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.retro-shark {
+  display: block;
+  flex-shrink: 0;
+  animation: retro-swim 1.2s steps(4) infinite;
+}
+
+@keyframes retro-swim {
+  0% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-3px) rotate(-1deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(3px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.retro-coins {
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+}
+
+.retro-coin {
+  width: 14px;
+  height: 14px;
+  background: var(--warn);
+  border: 2px solid color-mix(in srgb, var(--warn) 60%, #000);
+  box-shadow: 1px 1px 0 0 #000;
+  color: var(--bg-0);
+  font-family: var(--ff-mono);
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  animation: retro-coin-bob 1s steps(3) infinite;
+}
+.retro-coin:nth-child(2) { animation-delay: 200ms; width: 12px; height: 12px; font-size: 9px; }
+.retro-coin:nth-child(3) { animation-delay: 400ms; width: 10px; height: 10px; font-size: 8px; }
+
+@keyframes retro-coin-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.retro-bar-track {
+  width: 100%;
+  height: 18px;
+  background: var(--bg-0);
+  border: 2px solid var(--line-2);
+  box-shadow: 2px 2px 0 0 #000;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.retro-bar-fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0,
+    var(--accent) 8px,
+    transparent 8px,
+    transparent 11px
+  );
+  animation: retro-fill 1.8s steps(14) infinite;
+}
+
+@keyframes retro-fill {
+  0% { width: 0%; }
+  50% { width: 65%; }
+  80% { width: 88%; }
+  100% { width: 100%; }
+}
+
+.retro-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--ff-mono);
+  font-size: var(--fz-8);
+  color: var(--fg-2);
+  margin-top: var(--s-3);
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.retro-cursor {
+  animation: retro-blink 500ms steps(1) infinite;
+  color: var(--accent);
+  margin-left: 4px;
+}
+
+@keyframes retro-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.retro-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--ff-mono);
+  font-size: 10px;
+  color: var(--fg-3);
+  border-top: 1px dashed var(--line-1);
+  padding-top: var(--s-3);
+  letter-spacing: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .retro-led, .retro-shark, .retro-coin, .retro-bar-fill, .retro-cursor {
+    animation: none !important;
+  }
+}

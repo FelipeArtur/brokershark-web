@@ -4,14 +4,29 @@ const h = (tag, props, ...children) => React.createElement(tag, props, ...childr
 
 const { fmtBRL } = window.BS;
 
-function BulkCategorizeModal({ groups, catsByFlow, monthLabel, onApply, onClose, onRefreshCats, onToast }) {
+function BulkCategorizeModal({ groups = [], catsByFlow, monthLabel, onApply, onClose, onRefreshCats, onToast, initialFlow }) {
   const [creatingFor, setCreatingFor] = React.useState(null);
   const [newCatName, setNewCatName] = React.useState("");
   const [busy, setBusy] = React.useState(null);
   const Modal = window.BS.Modal;
   const prettify = window.BS.prettifyDesc || (s => s);
-  const total = groups.reduce((s, g) => s + g.count, 0);
-  const plan = window.BS.suggestionPlan(groups);
+
+  const expGroups = React.useMemo(() => (groups || []).filter(g => g.flow === "expense"), [groups]);
+  const incGroups = React.useMemo(() => (groups || []).filter(g => g.flow === "income"), [groups]);
+
+  const [activeFlow, setActiveFlow] = React.useState(
+    initialFlow || (expGroups.length === 0 && incGroups.length > 0 ? "income" : "expense")
+  );
+
+  React.useEffect(() => {
+    if (initialFlow) setActiveFlow(initialFlow);
+  }, [initialFlow]);
+
+  const isExp = activeFlow === "expense";
+  const visibleGroups = isExp ? expGroups : incGroups;
+  const total = visibleGroups.reduce((s, g) => s + g.count, 0);
+  const allTotal = (groups || []).reduce((s, g) => s + g.count, 0);
+  const plan = window.BS.suggestionPlan(visibleGroups);
 
   const apply = async (g, categoryId) => {
     if (busy) return;
@@ -32,12 +47,12 @@ function BulkCategorizeModal({ groups, catsByFlow, monthLabel, onApply, onClose,
     if (busy || plan.length === 0) return;
     setBusy("__all__");
     const res = await Promise.allSettled(
-      plan.map(p => onApply(groups.find(g => g.merchant_key === p.merchant_key && g.flow === p.flow), p.category_id))
+      plan.map(p => onApply(visibleGroups.find(g => g.merchant_key === p.merchant_key && g.flow === p.flow), p.category_id))
     );
     const ok = res.filter(r => r.status === "fulfilled");
     const err = res.length - ok.length;
     if (ok.length) {
-      onToast(`${ok.length} ${ok.length === 1 ? "comerciante categorizado" : "comerciantes categorizados"}`, "success", {
+      onToast(`${ok.length} ${ok.length === 1 ? "comerciante categorizado" : "comerciantes categorizados"} em ${isExp ? "gastos" : "entradas"}`, "success", {
         label: "Desfazer",
         onClick: () => Promise.all(ok.map(r => r.value.undo()))
           .catch(e => onToast(e.message || "Não foi possível desfazer.", "error")),
@@ -63,25 +78,48 @@ function BulkCategorizeModal({ groups, catsByFlow, monthLabel, onApply, onClose,
     }
   };
 
-  return h(Modal, { open: true, onClose, title: `Categorizar em lote — ${monthLabel}`, width: 720 },
-    h("div", { style: { display: "flex", flexDirection: "column", gap: "var(--s-5)" } },
+  const footerBulk = h("div", { className: "modal-footer-wrap" },
+    h("div", { className: "modal-footer-meta" },
+      allTotal === 0
+        ? `Tudo categorizado em ${monthLabel}.`
+        : visibleGroups.length === 0
+          ? `Tudo categorizado em ${isExp ? "gastos" : "entradas"} para ${monthLabel}.`
+          : `${visibleGroups.length} ${visibleGroups.length === 1 ? "comerciante aguardando" : "comerciantes aguardando"} · ${total} ${total === 1 ? "lançamento" : "lançamentos"}`
+    ),
+    h("div", { className: "modal-footer-actions" },
+      h("button", {
+        type: "button",
+        className: allTotal === 0 ? "px-btn px-btn--primary" : "px-btn",
+        onClick: onClose
+      }, allTotal === 0 ? "Concluir" : "Fechar")
+    )
+  );
 
-      h("div", { className: "label", style: { color: "var(--fg-2)" } },
-        groups.length === 0
-          ? `Tudo categorizado em ${monthLabel}.`
-          : `${groups.length} ${groups.length === 1 ? "comerciante aguarda" : "comerciantes aguardam"} · ${total} ${total === 1 ? "lançamento" : "lançamentos"}`),
+  return h(Modal, { open: true, onClose, title: `Categorizar em lote. ${monthLabel}`, width: 720, footer: footerBulk },
+    h("div", { style: { display: "flex", flexDirection: "column", gap: "var(--s-4)" } },
+
+      h(window.BS.SegmentControl, {
+        options: [
+          { value: "expense", label: `Gastos (${expGroups.length})` },
+          { value: "income", label: `Entradas (${incGroups.length})` },
+        ],
+        value: activeFlow,
+        onChange: setActiveFlow,
+        columns: 2,
+        fill: true,
+      }),
 
       plan.length > 0 && h("div", { className: "px-row" },
         h("span", { style: { flex: 1, fontFamily: "var(--ff-sans)", fontSize: "var(--fz-8)", color: "var(--fg-0)" } },
-          `${plan.length} ${plan.length === 1 ? "sugestão automática" : "sugestões automáticas"}`),
-        h("button", { className: "px-btn px-btn--primary", onClick: applyAll, disabled: !!busy },
-          busy === "__all__" ? "APLICANDO…" : "APLICAR TODAS")
+          `${plan.length} ${plan.length === 1 ? "sugestão automática" : "sugestões automáticas"} para ${isExp ? "gastos" : "entradas"}`),
+        h("button", { className: "px-btn px-btn--primary", onClick: applyAll, disabled: true },
+          busy === "__all__" ? "Aplicando…" : "Aplicar todas")
       ),
 
-      groups.length === 0
-        ? h("div", { className: "px-empty" }, "NADA A CATEGORIZAR")
+      visibleGroups.length === 0
+        ? h("div", { className: "px-empty" }, `Nenhum comerciante aguardando categorização em ${isExp ? "gastos" : "entradas"}.`)
         : h("div", { className: "px-list", style: { maxHeight: "55vh", overflowY: "auto" } },
-            groups.map(g => {
+            visibleGroups.map(g => {
               const list = catsByFlow[g.flow] || [];
               const nome = prettify(g.sample_description);
               const criando = creatingFor === g.merchant_key;
@@ -91,8 +129,7 @@ function BulkCategorizeModal({ groups, catsByFlow, monthLabel, onApply, onClose,
                   nome.charAt(0).toUpperCase()),
 
                 h("span", { style: { flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis",
-                                     whiteSpace: "nowrap", fontSize: "var(--fz-6)", color: "var(--fg-0)" },
-                            "data-tip": nome }, nome),
+                                     whiteSpace: "nowrap", fontSize: "var(--fz-6)", color: "var(--fg-0)" } }, nome),
 
                 h("span", { className: "px-chip" }, `${g.count}×`),
                 h("span", { className: "mono", style: { fontSize: "var(--fz-7)",
@@ -102,34 +139,36 @@ function BulkCategorizeModal({ groups, catsByFlow, monthLabel, onApply, onClose,
                 criando
                   ? h(React.Fragment, null,
                       h("input", {
-                        className: "px-field", autoFocus: true, placeholder: "Nome da categoria…",
+                        className: "px-field", autoFocus: true,
+                        placeholder: `Nova categoria de ${g.flow === "income" ? "entrada" : "gasto"}…`,
                         value: newCatName, style: { width: 160 },
-                        onChange: e => setNewCatName(e.target.value),
+                        disabled: true, onChange: e => setNewCatName(e.target.value),
                         onKeyDown: e => {
                           if (e.key === "Escape") { setCreatingFor(null); setNewCatName(""); }
                           if (e.key === "Enter") handleCreateNew(g);
                         },
                       }),
                       h("button", { className: "px-btn px-btn--primary", onClick: () => handleCreateNew(g),
-                                    disabled: !newCatName.trim() || !!busy }, "CRIAR")
+                                    disabled: true }, "Criar")
                     )
                   : h(React.Fragment, null,
                       g.suggested_category_id != null && h("button", {
-                        className: "px-btn", disabled: !!busy,
-                        "data-tip": "Aplicar a sugestão",
+                        className: "px-btn", disabled: true,
+                        "data-tip": "Aplicar sugestão.",
                         onClick: () => apply(g, g.suggested_category_id),
                       }, `✨ ${g.suggested_category_name}`),
                       h("select", {
-                        className: "px-field", value: "", "aria-label": "Categoria",
-                        disabled: !!busy, style: { width: 150 },
-                        onChange: e => {
+                        className: "px-field", value: "",
+                        "aria-label": isExp ? "Categoria de gasto" : "Categoria de entrada",
+                        style: { width: 150 },
+                        disabled: true, onChange: e => {
                           if (e.target.value === "__NEW__") { setCreatingFor(g.merchant_key); setNewCatName(""); }
                           else if (e.target.value) apply(g, parseInt(e.target.value, 10));
                         },
                       },
                         h("option", { value: "" }, g.suggested_category_id != null ? "Outra…" : "Escolher…"),
                         list.map(c => h("option", { key: c.id, value: c.id }, c.name)),
-                        h("option", { value: "__NEW__" }, "+ Nova categoria")
+                        h("option", { value: "__NEW__" }, `+ Nova categoria de ${isExp ? "gasto" : "entrada"}`)
                       )
                     )
               );

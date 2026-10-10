@@ -16,5 +16,15 @@
       }));
   }
 
-  return { suggestionPlan };
+  function groupsByFlow(groups) {
+    const expense = [];
+    const income = [];
+    for (const g of (groups || [])) {
+      if (g.flow === "income") income.push(g);
+      else expense.push(g);
+    }
+    return { expense, income };
+  }
+
+  return { suggestionPlan, groupsByFlow };
 });

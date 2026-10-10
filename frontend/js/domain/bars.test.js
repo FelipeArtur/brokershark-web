@@ -9,6 +9,13 @@ const slot = (income, expenses, prev) => ({
 
 const keys = (specs) => specs.map(s => s.key);
 
+test("cobertura incompleta não vira medição nem comparação", () => {
+  const partial = { data: { income: 100, expenses: 20, has_data: false }, prev: { income: 80, expenses: 10, has_data: true } };
+  assert.ok(B.barSpecs(partial, 100, true).every(s => !s.measured && s.height === 0 && s.markAt === null));
+  const zero = { data: { income: 0, expenses: 0, has_data: true }, prev: partial.data };
+  assert.ok(B.barSpecs(zero, 100, true).every(s => s.measured && s.height === 0 && s.markAt === null));
+});
+
 test("sem comparar são só as duas barras do mês", () => {
   assert.deepEqual(keys(B.barSpecs(slot(100, 50, [80, 40]), 100, false)), ["i", "e"]);
 });

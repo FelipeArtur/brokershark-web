@@ -25,6 +25,19 @@ Accounts, merchants, transactions, invoices and investment positions are invente
 The generator uses a fixed random seed and covers the 24 months ending today.
 No anonymized copy of an actual ledger is used. Old screenshots are not included.
 
+## Interface
+
+The dashboard brings together available cash, net worth, monthly results and
+investments. The chart separates measured months from future commitments.
+Browse months, filter transactions and open account, category and investment
+details. Settings and import panels explain the app without accepting files or
+changing data. Local fonts, keyboard focus and reduced motion support the layout
+on desktop, tablet and mobile.
+
+![Dashboard with fictional data](docs/demo/dashboard.png)
+
+The images in `docs/demo` were captured from the showcase and its fictional ledger.
+
 ## Verify
 
 ```bash

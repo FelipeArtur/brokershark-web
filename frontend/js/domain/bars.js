@@ -27,7 +27,7 @@
 
   /**
    * @brief   Quais barras um mês desenha, com a escala da série.
-   * @warning `measured` separa zero MEDIDO de mês sem medição — a altura é 0 nos dois,
+   * @warning `measured` separa zero MEDIDO de mês sem medição. a altura é 0 nos dois,
    *          e sem o campo a tela desenha o mesmo nada pra afirmações diferentes.
    * @param slot    { data: {income, expenses}|null, prev: {income, expenses}|null }
    * @param maxV    maior valor da série, pra escala comum entre os meses
@@ -37,8 +37,8 @@
    *          em valor, para a marca poder dizer o que aconteceu sem o olho medir.
    */
   function barSpecs(slot, maxV, compare) {
-    const d = (slot && slot.data) || null;
-    const prev = compare && slot ? slot.prev : null;
+    const d = slot && slot.data && slot.data.has_data !== false ? slot.data : null;
+    const prev = compare && slot && slot.prev && slot.prev.has_data !== false ? slot.prev : null;
 
     const barra = (key, kind, campo) => {
       //> A marca só existe quando os DOIS meses têm medição: sobre uma barra sem
@@ -48,7 +48,7 @@
         key, kind, measured: !!d,
         height: d ? scaleBar(d[campo], maxV) : 0,
         //> Teto: `maxV` é a escala do ANO na tela, e o mês anterior pode ser de
-        //> dezembro do ano passado — sem o corte a marca sai da moldura.
+        //> dezembro do ano passado. sem o corte a marca sai da moldura.
         markAt: compara ? Math.min(scaleBar(prev[campo], maxV), BAR_MAX_PX) : null,
         delta: compara ? d[campo] - prev[campo] : null,
       };

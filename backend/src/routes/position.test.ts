@@ -96,3 +96,13 @@ test("as_of diz de quando é a posição, não de quando ela foi pedida", async 
   assert.equal(payload.as_of, "2026-06-22");
   assert.equal(payload.has_data, false, "agosto em si não tem lançamento");
 });
+
+test("cartão acompanha a fatura do mês selecionado, sem repetir a atual", async () => {
+  const db = freshDb();
+  db.prepare("INSERT INTO invoices (account_id, ref_month, due_date, total_cents, source_file) VALUES ('cartao-b','2025-04','2025-04-20',18000,'demo')").run();
+  const {payload} = await pedir(db, "/api/position?year=2025&month=4");
+  assert.equal(payload.credit_cards[0].open_invoice.total, 180);
+  assert.equal(payload.credit_cards[0]._invoice_due_date, "2025-04-20");
+  const empty = await pedir(db, "/api/position?year=2025&month=5");
+  assert.equal(empty.payload.credit_cards[0].open_invoice, null);
+});

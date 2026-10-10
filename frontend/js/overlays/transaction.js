@@ -10,9 +10,9 @@ const METHOD_LABELS = {
   freelance: "Freelance", other: "Outro",
 };
 
-// Ficha do lançamento. É a única tela do app que mostra a linha inteira — o que
-// o banco mandou, o que o BrokerShark deduziu e o que você renomeou — então ela
-/** `YYYY-MM` do lançamento deslocado em N meses — é como "12 meses" vira uma data. */
+// Ficha do lançamento. É a única tela do app que mostra a linha inteira. o que
+// o banco mandou, o que o BrokerShark deduziu e o que você renomeou. então ela
+/** `YYYY-MM` do lançamento deslocado em N meses. é como "12 meses" vira uma data. */
 function mesMais(dataIso, n) {
   const y = Number(String(dataIso).slice(0, 4));
   const m = Number(String(dataIso).slice(5, 7)) - 1 + n;
@@ -44,6 +44,7 @@ function CategoryEditor({ tx, onClose, onSave }) {
   const [selected, setSelected] = useState(tx?.category_id || null);
   const [displayName, setDisplayName] = useState(tx?.display_name || "");
   const [isThirdParty, setIsThirdParty] = useState(!!(tx?.is_third_party));
+  const [isInvestment, setIsInvestment] = useState(isInvest(tx));
   const [recorrente, setRecorrente] = useState(!!(tx?.is_recurring));
   //> O estado é o NÚMERO de meses e a data sai dele: guardar os dois obriga a
   //> sincronizar, e o primeiro esquecimento diz "12 meses" com uma data de 6.
@@ -61,6 +62,7 @@ function CategoryEditor({ tx, onClose, onSave }) {
     setSelected(tx.category_id);
     setDisplayName(tx.display_name || "");
     setIsThirdParty(!!(tx.is_third_party));
+    setIsInvestment(isInvest(tx));
     setRecorrente(!!(tx.is_recurring));
     setMeses(mesesDeAte(tx));
     setOutro(!FIXOS.includes(mesesDeAte(tx)));
@@ -92,6 +94,9 @@ function CategoryEditor({ tx, onClose, onSave }) {
           fields.recurring_end = fimVal;
         }
       }
+      if (!_self && isInvestment !== isInvest(tx)) {
+        fields.is_investment = isInvestment;
+      }
       if (Object.keys(fields).length > 0) {
         await window.patchTransaction(tx.id, fields);
       }
@@ -109,7 +114,7 @@ function CategoryEditor({ tx, onClose, onSave }) {
     : _self ? "var(--fg-3)" : _invest ? "var(--reserve)"
     : (flowIsExpense ? "var(--neg)" : "var(--pos)");
   const especie = isThirdParty ? "Em nome de terceiros"
-    : _self ? "Transferência entre suas contas" : _invest ? "Movimento de investimento"
+    : _self ? "Transferência entre contas próprias" : _invest ? "Movimentação de investimento"
     : flowIsExpense ? "Despesa" : "Receita";
 
   const rotulo = (text) => h("span", {
@@ -125,7 +130,31 @@ function CategoryEditor({ tx, onClose, onSave }) {
     //> `external_id` fora: UUID de dedup do import, não responde pergunta nenhuma.
   ].filter(([, v]) => v != null && v !== "") : [];
 
-  return h(Modal, { open: !!tx, onClose, title: "Lançamento", width: 620 },
+  const footerTx = tx ? h("div", { className: "modal-footer-wrap" },
+    h("div", { className: "modal-footer-actions", style: { marginLeft: 0 } },
+      h("button", {
+        type: "button",
+        className: "px-btn px-btn--ghost px-btn--sm",
+        disabled: true, onClick: () => onSave({ deleted: true, _tx: tx }),
+        style: { color: "var(--neg)", fontWeight: 700 }
+      }, "Excluir lançamento")
+    ),
+    h("div", { className: "modal-footer-actions" },
+      h("button", {
+        type: "button",
+        className: "px-btn",
+        onClick: onClose
+      }, "Fechar"),
+      h("button", {
+        type: "button",
+        className: "px-btn px-btn--primary",
+        onClick: save,
+        disabled: true
+      }, saving ? "Salvando…" : "Salvar")
+    )
+  ) : null;
+
+  return h(Modal, { open: !!tx, onClose, title: "Lançamento", width: 620, footer: footerTx, readOnly: true },
     tx && h("div", { style: { display: "flex", flexDirection: "column", gap: 18 } },
 
       h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } },
@@ -165,21 +194,21 @@ function CategoryEditor({ tx, onClose, onSave }) {
       ),
 
       h("div", { style: { display: "flex", flexDirection: "column", gap: 6 } },
-        rotulo(flowIsExpense ? "Categoria" : "Categoria da receita"),
+        rotulo(flowIsExpense ? "Categoria de gasto" : "Categoria de entrada"),
         cats.length === 0
           ? h("span", { style: { fontSize: 11, color: "var(--fg-3)" } },
-              "Nenhuma categoria criada ainda — crie pela engrenagem do widget Categorias.")
-          : h("div", { style: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 } },
+              `Nenhuma categoria de ${flowIsExpense ? "gasto" : "entrada"} criada ainda. crie pela engrenagem do widget Categorias.`)
+          : h("div", { className: "tx-cat-grid" },
               cats.map(c => h("button", {
                 key: c.id, type: "button",
                 onClick: () => setSelected(selected === c.id ? null : c.id),
                 "aria-pressed": selected === c.id,
-                "data-tip": c.name,
                 style: {
                   padding: "7px 8px", textAlign: "center",
                   fontSize: 11, fontWeight: selected === c.id ? 700 : 500,
                   background: selected === c.id ? "var(--accent-bg)" : "var(--bg-0)",
                   border: `1px solid ${selected === c.id ? "color-mix(in oklch, var(--accent) 45%, transparent)" : "var(--line-1)"}`,
+                  boxShadow: "1px 1px 0 0 #000",
                   color: selected === c.id ? "var(--accent)" : "var(--fg-1)",
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", transition: "all 0.12s", cursor: "pointer"
                 }
@@ -197,6 +226,7 @@ function CategoryEditor({ tx, onClose, onSave }) {
           padding: "10px 12px", textAlign: "left",
           background: isThirdParty ? "var(--warn-bg)" : "var(--bg-0)",
           border: `1px solid ${isThirdParty ? "color-mix(in oklch, var(--warn) 45%, transparent)" : "var(--line-1)"}`,
+          boxShadow: "1px 1px 0 0 #000",
           color: isThirdParty ? "var(--warn)" : "var(--fg-2)",
           fontSize: 11, cursor: "pointer", transition: "all 0.12s"
         }
@@ -207,8 +237,35 @@ function CategoryEditor({ tx, onClose, onSave }) {
           h("span", { style: { color: "var(--fg-3)", lineHeight: 1.5 } },
             isThirdParty
               ? "Fora dos seus gastos, receitas e investimentos. A categoria acima vira o rótulo do projeto, e a tabela mostra a etiqueta na linha."
-              : "Para dinheiro que passou pela sua conta sem ser seu — arrecadação, reembolso, compra por outra pessoa.")),
+              : "Para dinheiro que passou pela sua conta sem ser seu. arrecadação, reembolso, compra por outra pessoa.")),
         h(window.BS.IconLock, { size: 16, open: !isThirdParty })
+      ),
+
+      !_self && h("button", {
+        type: "button",
+        onClick: () => setIsInvestment(v => !v),
+        style: {
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+          padding: "10px 12px", textAlign: "left",
+          background: isInvestment ? "var(--reserve-bg)" : "var(--bg-0)",
+          border: `1px solid ${isInvestment ? "color-mix(in oklch, var(--reserve) 45%, transparent)" : "var(--line-1)"}`,
+          boxShadow: "1px 1px 0 0 #000",
+          color: isInvestment ? "var(--reserve)" : "var(--fg-2)",
+          fontSize: 11, cursor: "pointer", transition: "all 0.12s"
+        }
+      },
+        h("span", { style: { display: "flex", flexDirection: "column", gap: 3 } },
+          h("span", { style: { fontWeight: 700 } },
+            isInvestment ? "Movimentação de investimento" : "Marcar como investimento"),
+          h("span", { style: { color: "var(--fg-3)", lineHeight: 1.5 } },
+            isInvestment
+              ? (flowIsExpense
+                  ? "Aplicação: sai do consumo e entra no fluxo de investimentos."
+                  : "Resgate: sai da receita e entra no fluxo de investimentos.")
+              : (flowIsExpense
+                  ? "Para aplicações em CDB, RDB, Caixinhas ou corretora que saíram da conta corrente."
+                  : "Para resgates de investimentos que entraram na conta corrente sem ser salário."))),
+        h("span", { className: "mono", style: { fontSize: 16, flexShrink: 0 } }, isInvestment ? "◉" : "○")
       ),
 
       h("button", {
@@ -219,17 +276,18 @@ function CategoryEditor({ tx, onClose, onSave }) {
           padding: "10px 12px", textAlign: "left",
           background: recorrente ? "var(--accent-bg)" : "var(--bg-0)",
           border: `1px solid ${recorrente ? "color-mix(in oklch, var(--accent) 45%, transparent)" : "var(--line-1)"}`,
+          boxShadow: "1px 1px 0 0 #000",
           color: recorrente ? "var(--accent)" : "var(--fg-2)",
           fontSize: 11, cursor: "pointer", transition: "all 0.12s"
         }
       },
         h("span", { style: { display: "flex", flexDirection: "column", gap: 3 } },
           h("span", { style: { fontWeight: 700 } },
-            recorrente ? "Se repete todo mês" : "Marcar como recorrente"),
+            recorrente ? "Recorrente mensal" : "Marcar como recorrente"),
           h("span", { style: { color: "var(--fg-3)", lineHeight: 1.5 } },
             recorrente
-              ? `Aparece nos compromissos de cada mês, no dia ${String(tx.date).slice(8, 10)}, enquanto você não desmarcar.`
-              : "Para conta que chega todo mês. Passa a contar nos compromissos, com o valor e o dia deste lançamento.")),
+              ? `Aparece nos compromissos de cada mês, no dia ${String(tx.date).slice(8, 10)}, enquanto permanecer ativa.`
+              : "Para despesas ou receitas mensais fixas. Passa a constar nos compromissos com o valor e dia deste lançamento.")),
         h("span", { className: "mono", style: { fontSize: 16, flexShrink: 0 } }, recorrente ? "◉" : "○")
       ),
 
@@ -258,7 +316,7 @@ function CategoryEditor({ tx, onClose, onSave }) {
           outro && h("label", { className: "rec-prazo-custom" },
             h("input", {
               //> `text` + `inputMode="numeric"`: o `number` aceita "e", "+" e "-", e
-              //> entrega string vazia quando é inválido — o dígito some sem ninguém ver.
+              //> entrega string vazia quando é inválido. o dígito some sem ninguém ver.
               type: "text", inputMode: "numeric", value: meses,
               placeholder: "8", maxLength: 3, autoFocus: true,
               onChange: e => setMeses(e.target.value.replace(/\D/g, "").replace(/^0+/, "")),
@@ -277,12 +335,12 @@ function CategoryEditor({ tx, onClose, onSave }) {
                   h("button", {
                     type: "button", className: "px-btn px-btn--ghost px-btn--sm",
                     onClick: () => setEncerrada(null),
-                    "data-tip": "Volta a valer daqui pra frente, do prazo original",
+                    "data-tip": "Reativa a recorrência a partir do prazo original.",
                   }, "Reativar"))
               : h("button", {
                   type: "button", className: "px-btn px-btn--ghost px-btn--sm",
                   onClick: () => setEncerrada(window.BS.todayISO()),
-                  "data-tip": "Para de comprometer os meses seguintes e mantém o registro nos meses em que a conta já caiu. Desmarcar é outra coisa: apaga de todo mês.",
+                  "data-tip": "Interrompe o compromisso nos meses seguintes, preservando o histórico dos meses anteriores.",
                 }, "Encerrar agora"),
           ),
 
@@ -290,24 +348,14 @@ function CategoryEditor({ tx, onClose, onSave }) {
             encerrada
               ? `Não compromete mais nada depois de ${mesExtenso(String(encerrada).slice(0, 7))}. Os meses em que a conta caiu continuam registrados.`
               : n
-                ? `Conta de ${mesExtenso(desde)} até ${mesExtenso(ate)} — ${n}${n === 1 ? "ª e única vez" : "× no total"}.`
+                ? `Conta de ${mesExtenso(desde)} até ${mesExtenso(ate)}. ${n}${n === 1 ? "ª e única vez" : "× no total"}.`
                 : outro
                   ? "Digite quantos meses a recorrência vale."
                   : "Sem prazo: conta em todo mês daqui pra frente, até você desmarcar."),
         );
       })(),
 
-      err && h("div", { style: { fontSize: 12, color: "var(--neg)", background: "color-mix(in oklch, var(--neg) 10%, transparent)", padding: "10px 12px" } }, err),
-
-      h("div", { style: { display: "flex", gap: 8, justifyContent: "space-between", alignItems: "center", paddingTop: 4 } },
-        h("button", {
-          className: "px-btn px-btn--ghost px-btn--sm",
-          onClick: () => onSave({ deleted: true, _tx: tx }),
-          style: { color: "var(--neg)", fontWeight: 600, marginLeft: -8 }
-        }, "Excluir"),
-        h("button", { className: "px-btn px-btn--primary", onClick: save, disabled: saving },
-          saving ? "Salvando…" : "Salvar")
-      )
+      err && h("div", { className: "px-alert px-alert--neg" }, err),
     )
   );
 }

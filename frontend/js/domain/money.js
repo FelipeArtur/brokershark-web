@@ -16,7 +16,7 @@
   };
 
   /**
-   * @brief   A espécie de uma linha de dinheiro — exatamente uma das sete.
+   * @brief   A espécie de uma linha de dinheiro. exatamente uma das sete.
    * @warning A ORDEM é load-bearing: previsto antes de tudo (dinheiro que ainda não
    *          se moveu não é gasto de ninguém), liquidação antes de despesa (senão o
    *          consumo dobra), SELF antes de investimento, terceiro antes de investimento.
@@ -39,8 +39,8 @@
 
   const KIND_COLOR = {
     [KIND.FORECAST]:    "var(--warn)",
-    [KIND.SETTLEMENT]:  "var(--fg-3)",
-    [KIND.TRANSFER]:    "var(--fg-3)",
+    [KIND.SETTLEMENT]:  "var(--fg-1)",
+    [KIND.TRANSFER]:    "var(--fg-0)",
     [KIND.INVEST]:      "var(--reserve)",
     [KIND.THIRD_PARTY]: "var(--warn)",
     [KIND.REVENUE]:     "var(--pos)",
@@ -49,7 +49,7 @@
 
   const KIND_LABEL = {
     [KIND.FORECAST]:    "Previstos",
-    [KIND.SETTLEMENT]:  "Liquidações",
+    [KIND.SETTLEMENT]:  "Pagamentos de fatura",
     [KIND.TRANSFER]:    "Transferências",
     [KIND.INVEST]:      "Investimentos",
     [KIND.THIRD_PARTY]: "Em nome de terceiros",
@@ -58,13 +58,13 @@
   };
 
   const KIND_HINT = {
-    [KIND.FORECAST]:    "parcela que o contrato promete e a fatura ainda não trouxe — compromete o disponível, mas fica fora dos totais do que já aconteceu",
-    [KIND.SETTLEMENT]:  "liquidação de fatura — os gastos reais são os itens da fatura; contar o pagamento dobraria o consumo",
-    [KIND.TRANSFER]:    "transferência entre suas contas — não conta como despesa nem receita",
-    [KIND.INVEST]:      "movimento de investimento — não conta como despesa nem receita",
-    [KIND.THIRD_PARTY]: "dinheiro que passou pela sua conta sem ser seu — fora de todos os seus totais",
-    [KIND.REVENUE]:     "receita real",
-    [KIND.EXPENSE]:     "despesa de consumo",
+    [KIND.FORECAST]:    "Parcela que o contrato promete e a fatura ainda não trouxe. compromete o saldo disponível, mas fica fora dos totais do que já aconteceu.",
+    [KIND.SETTLEMENT]:  "Liquidação de fatura. os gastos reais são os lançamentos da fatura; somar o pagamento duplicaria o consumo.",
+    [KIND.TRANSFER]:    "Transferência entre contas próprias. não contabiliza como despesa nem receita.",
+    [KIND.INVEST]:      "Movimentação de investimento. não contabiliza como despesa nem receita.",
+    [KIND.THIRD_PARTY]: "Dinheiro movimentado em nome de terceiros. não entra nos seus totais pessoais.",
+    [KIND.REVENUE]:     null,
+    [KIND.EXPENSE]:     null,
   };
 
   function kindSign(t) {

@@ -35,7 +35,7 @@ function CommitmentsPanel({ commitments, monthSel, monthTx, onEditCategory, onCl
       style: esmaecido ? { opacity: 0.65 } : null,
     },
       h("span", { className: "mono cmt-quando" }, quando),
-      h("span", { className: "cmt-titulo", "data-tip": titulo }, titulo),
+      h("span", { className: "cmt-titulo" }, titulo),
       selo && h("span", { className: "cmt-selo", style: { color: seloCor, borderColor: seloCor } }, selo),
       h("span", { className: "mono cmt-valor", style: { color: flow === "income" ? "var(--pos)" : "var(--warn)" } },
         (flow === "income" ? "+" : "−") + fmtBRL(Math.abs(valor))),
@@ -65,9 +65,20 @@ function CommitmentsPanel({ commitments, monthSel, monthTx, onEditCategory, onCl
     );
   };
 
+  const footerCommitments = h("div", { className: "modal-footer-wrap" },
+    h("div", { className: "modal-footer-meta" },
+      h("span", { style: { textTransform: "uppercase", fontSize: 10, letterSpacing: "0.05em" } }, "Total a sair no mês:"),
+      h("b", { className: "mono", style: { color: "var(--warn)", fontSize: 14 } }, "−" + fmtBRL(totalSaida))
+    ),
+    h("div", { className: "modal-footer-actions" },
+      h("button", { className: "px-btn", onClick: onClose }, "Fechar")
+    )
+  );
+
   return h(window.BS.Modal, {
     open: true, onClose, width: 720,
-    title: `Comprometido em ${mesNome}`,
+    title: `Comprometido. ${mesNome}`,
+    footer: footerCommitments,
   },
     h("div", { className: "cmt-painel" },
       vazio
@@ -75,11 +86,11 @@ function CommitmentsPanel({ commitments, monthSel, monthTx, onEditCategory, onCl
             "Nada comprometido neste mês.",
             h("br"),
             h("span", { style: { fontSize: 11 } },
-              "Aparecem aqui: fatura de cartão em aberto, parcela que o banco declarou e recorrente que você marcou na ficha do lançamento."))
+              "Aparecem aqui: faturas de cartão em aberto, parcelas informadas pelo banco e recorrências marcadas na ficha do lançamento."))
         : h(React.Fragment, null,
 
             //> A fatura vem primeiro: é o maior pedaço do total, e o card existe pra
-            //> explicar o número — não pra mostrar tudo menos a parte que mais pesa.
+            //> explicar o número. não pra mostrar tudo menos a parte que mais pesa.
             faturas.length > 0 && h(React.Fragment, null,
               h("div", { className: "cmt-secao",
                 "data-tip": "O que falta pagar do cartão neste mês. As parcelas lançadas são itens dela; quem compromete é a fatura." },
@@ -90,17 +101,17 @@ function CommitmentsPanel({ commitments, monthSel, monthTx, onEditCategory, onCl
                 key: "inv" + f.invoice_id,
                 quando: fmtDateBR(f.due_date),
                 titulo: f.account_name || f.account_id,
-                selo: "vence",
+                selo: "Vence",
                 seloCor: "var(--warn)",
                 valor: f.amount,
                 flow: "expense",
               })),
             ),
 
-            grupoParcelas("lancadas", "Parcelas · lançadas",
-              "já são item da fatura deste mês — quem compromete é a fatura, não a linha"),
-            grupoParcelas("previstas", "Parcelas · previstas",
-              "o banco declarou o contrato e a fatura ainda não chegou — é o que soma no total"),
+            grupoParcelas("lancadas", "Parcelas · Lançadas",
+              "Já são lançamentos da fatura deste mês. o compromisso financeiro consta na fatura."),
+            grupoParcelas("previstas", "Parcelas · Previstas",
+              "Parcelas futuras previstas pelo contrato que ainda não constam na fatura aberta."),
 
             parcelas.some(p => p.remaining > 0) && h("div", { className: "cmt-nota" },
               (() => {
@@ -117,9 +128,9 @@ function CommitmentsPanel({ commitments, monthSel, monthTx, onEditCategory, onCl
                 titulo: prettifyDesc(r.label),
                 //> Quantas FALTAM, não a data-limite, que obriga a contar de cabeça.
                 //> `historic`: sem o selo, encerrada pareceria ativa em todo mês passado.
-                selo: r.historic ? "encerrada"
-                  : r.confirmed ? "já caiu"
-                  : r.until ? `restam ${window.BS.monthSpan(commitments.month, r.until)}` : "previsto",
+                selo: r.historic ? "Encerrada"
+                  : r.confirmed ? "Confirmado"
+                  : r.until ? `Restam ${window.BS.monthSpan(commitments.month, r.until)}` : "Previsto",
                 seloCor: r.historic || r.confirmed ? "var(--fg-3)" : "var(--warn)",
                 valor: r.amount,
                 flow: r.flow,
@@ -127,10 +138,6 @@ function CommitmentsPanel({ commitments, monthSel, monthTx, onEditCategory, onCl
               })),
             ),
           ),
-    ),
-    h("div", { className: "cmt-rodape" },
-      h("span", null, "Total que ainda vai sair"),
-      h("b", { className: "mono", style: { color: "var(--warn)", fontSize: 15 } }, "−" + fmtBRL(totalSaida)),
     ),
   );
 }

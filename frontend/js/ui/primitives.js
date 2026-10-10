@@ -15,7 +15,7 @@ function fmtBRL(v) {
 
 /**
  * @brief   Valor com a cor da espécie (`moneyKind`), centavos menores.
- * @warning O número INTEIRO carrega a cor, não só o sinal — a coluna de valor é onde
+ * @warning O número INTEIRO carrega a cor, não só o sinal. a coluna de valor é onde
  *          o olho pousa. Hierarquia por peso, nunca por cor trocada.
  */
 function Money({ t, value, kind, size, emphasis = false, title }) {
@@ -23,37 +23,33 @@ function Money({ t, value, kind, size, emphasis = false, title }) {
   const v = value != null ? value : (t ? t.amount : 0);
 
   const sign = v === 0 ? "" : (t ? window.BS.kindSign(t) : (v < 0 ? "−" : "+"));
-  const color = k ? window.BS.KIND_COLOR[k] : "var(--fg-1)";
+  const color = k ? window.BS.KIND_COLOR[k] : "var(--fg-0)";
   const { int, cents } = window.BS.fmtParts(v);
-  const dim = k === "settlement" ? 0.6 : 1;
 
   return h("span", {
     className: "mono",
-    "data-tip": title || (k ? window.BS.KIND_HINT[k] : undefined),
+    "data-tip": title || (k && window.BS.KIND_HINT[k] ? window.BS.KIND_HINT[k] : undefined),
     style: {
-      display: "inline-flex", alignItems: "baseline", gap: 2, opacity: dim,
+      display: "inline-flex", alignItems: "baseline", gap: 2,
       fontSize: size ? `${size}px` : undefined,
       fontVariantNumeric: "tabular-nums",
     },
   },
     h("span", { style: { color, fontWeight: 700 } }, sign),
-    h("span", { style: { color, fontWeight: emphasis ? 700 : 600 } }, "R$ ", int),
-    cents && h("span", { style: { color, opacity: 0.62, fontSize: "0.78em", fontWeight: 500 } }, cents)
+    h("span", { style: { color, fontWeight: 700 } }, "R$ ", int),
+    cents && h("span", { style: { color, opacity: 0.9, fontSize: "0.82em", fontWeight: 600 } }, cents)
   );
 }
 
 /**
- * @brief Número compacto, sem moeda.
- * @note  Não é `Intl` com `notation: "compact"`: em pt-BR o CLDR dá "12,3 mil", longo demais.
+ * @brief Formatação literal de número financeiro em pt-BR com centavos exatos.
  */
 function fmtCompact(v) {
   const n = Math.abs(v ?? 0);
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(".", ",") + "M";
-  if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(".", ",") + "k";
-  return n.toFixed(0);
+  return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-const fmtBRLCompact = (v) => "R$ " + fmtCompact(v);
+const fmtBRLCompact = (v) => fmtBRL(v);
 
 /**
  * @brief Data DD/MM, para dentro do mês selecionado, onde o ano é óbvio.
@@ -125,7 +121,7 @@ function prettifyDesc(raw) {
   }).join(" ");
 }
 
-const _modalLayers = [];  //< abertas, da mais funda pro topo — sem pilha, um Esc fecha as duas.
+const _modalLayers = [];  //< abertas, da mais funda pro topo. sem pilha, um Esc fecha as duas.
 
 /**
  * @brief   Foco preso na camada do topo: Tab circula, Esc fecha, foco volta ao sair.
@@ -171,7 +167,7 @@ function _useModalLayer(open, ref, onClose) {
   }, [open]);
 }
 
-function Modal({ open, onClose, title, children, width = 480 }) {
+function Modal({ open, onClose, title, children, footer, width = 480, className = "", readOnly = false }) {
   const dialogRef = _useRef(null);
   const titleId   = _useRef("modal-title-" + Math.random().toString(36).slice(2)).current;
 
@@ -180,24 +176,24 @@ function Modal({ open, onClose, title, children, width = 480 }) {
   if (!open) return null;
   return React.createElement("div", {
     onClick: onClose, role: "presentation",
-    style: { position: "fixed", inset: 0, background: "oklch(0% 0 0 / 0.55)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: "var(--z-modal)" }
+    className: "modal-backdrop",
   },
     React.createElement("div", {
       ref: dialogRef,
-      onClick: e => e.stopPropagation(), className: "modal fade-in",
+      onClick: e => e.stopPropagation(),
+      className: `modal fade-in ${className}`.trim(),
       role: "dialog", "aria-modal": "true", "aria-labelledby": titleId,
-      style: { width, maxWidth: "92vw", maxHeight: "88vh", display: "flex", flexDirection: "column", background: "var(--bg-1)", border: "1px solid var(--line-2)" }
+      style: { width },
     },
-      React.createElement("div", { style: { padding: "24px 32px 16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" } },
+      React.createElement("div", { className: "modal-header" },
         React.createElement("div", { id: titleId, className: "modal-title" }, title),
         React.createElement("button", {
-          onClick: onClose, "aria-label": "Fechar", "data-tip": "Fechar",
-          style: { width: 32, height: 32, background: "transparent", border: "none", color: "var(--fg-3)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.1s" },
-          onMouseEnter: e => { e.currentTarget.style.color = "var(--fg-0)"; e.currentTarget.style.background = "var(--bg-2)"; },
-          onMouseLeave: e => { e.currentTarget.style.color = "var(--fg-3)"; e.currentTarget.style.background = "transparent"; }
+          onClick: onClose, "aria-label": "Fechar",
+          className: "modal-close",
         }, "✕")
       ),
-      React.createElement("div", { style: { padding: "0 32px 32px 32px", overflow: "auto" } }, children)
+      React.createElement("div", { className: "modal-body" }, readOnly ? React.createElement("fieldset", {disabled:true, className:"demo-readonly"}, children) : children),
+      footer && React.createElement("div", { className: "modal-footer" }, footer)
     )
   );
 }
@@ -265,7 +261,7 @@ function useToasts() {
           }, t.action.label),
           React.createElement("button", {
             onClick: () => setList(l => l.filter(x => x.id !== t.id)),
-            "data-tip": "Fechar",
+            "aria-label": "Fechar",
             style: { cursor: "pointer", background: "transparent", border: "none", padding: 0, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--fg-3)", transition: "all 0.15s" },
             onMouseEnter: e => { e.currentTarget.style.color = "var(--fg-0)"; e.currentTarget.style.background = "var(--bg-2)"; },
             onMouseLeave: e => { e.currentTarget.style.color = "var(--fg-3)"; e.currentTarget.style.background = "transparent"; }
@@ -302,13 +298,13 @@ function Overlay({ open, onClose, children, width = 760 }) {
   if (!open) return null;
   return React.createElement("div", {
     onClick: onClose, role: "presentation",
-    style: { position: "fixed", inset: 0, background: "oklch(0% 0 0 / 0.55)", zIndex: "var(--z-layer)", display: "flex", justifyContent: "center" }
+    className: "overlay-backdrop",
   },
     React.createElement("div", {
       ref,
-      onClick: e => e.stopPropagation(), className: "fade-in",
+      onClick: e => e.stopPropagation(), className: "overlay-panel fade-in",
       role: "dialog", "aria-modal": "true",
-      style: { width, maxWidth: "100%", height: "100%", background: "var(--bg-0)", borderLeft: "1px solid var(--line-1)", borderRight: "1px solid var(--line-1)", display: "flex", flexDirection: "column" }
+      style: { width }
     }, children)
   );
 }
@@ -320,11 +316,31 @@ function BankChip({ bank, accountId }) {
   return React.createElement("span", {
     className: "chip",
     style: {
-      background: `color-mix(in oklch, ${color} 16%, transparent)`,
-      borderColor: `color-mix(in oklch, ${color} 32%, transparent)`,
-      color,
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      background: `color-mix(in oklch, ${color} 22%, var(--bg-1))`,
+      borderColor: color,
+      borderWidth: "1px",
+      borderStyle: "solid",
+      color: "#ffffff",
+      fontWeight: 700,
+      fontSize: 11,
+      boxShadow: "1px 1px 0 0 #000",
     },
-  }, label);
+  },
+    React.createElement("span", {
+      style: {
+        width: 6,
+        height: 6,
+        borderRadius: "50%",
+        backgroundColor: color,
+        flexShrink: 0,
+        boxShadow: `0 0 3px ${color}`,
+      }
+    }),
+    label
+  );
 }
 
 /**
@@ -345,14 +361,14 @@ function SegmentControl({ options, value, onChange, columns = 3, fill = true }) 
 }
 
 function BrokerSharkLogo({ size = 28 }) {
-  return React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 8 } },
+  return React.createElement("span", { className: "logo-brand", style: { display: "inline-flex", alignItems: "center", gap: 8 } },
     React.createElement("img", {
       src: "/static/img/favicon.ico",
       alt: "",
       width: size, height: size,
       style: { display: "block", flexShrink: 0 }
     }),
-    React.createElement("span", { style: { fontWeight: 700, fontSize: 14, letterSpacing: "-0.015em", color: "var(--fg-0)" } },
+    React.createElement("span", { className: "logo-text", style: { fontWeight: 700, fontSize: 14, letterSpacing: "-0.015em", color: "var(--fg-0)" } },
       "Broker",
       React.createElement("span", { style: { color: "var(--accent)" } }, "Shark")
     )
@@ -360,7 +376,7 @@ function BrokerSharkLogo({ size = 28 }) {
 }
 
 const TxRow = React.memo(({ t, cols, onEditCategory, onApplySuggestion, catsByFlow, onInlineCategory,
-                           amountSize, runningBalance }) => {
+                           amountSize, runningBalance, isSelected, onToggleSelect }) => {
   const K = window.BS.KIND;
   const kind = window.BS.moneyKind(t);
   //> Do campo, não da espécie: no crédito vira liquidação e some, mas não é seu.
@@ -374,12 +390,25 @@ const TxRow = React.memo(({ t, cols, onEditCategory, onApplySuggestion, catsByFl
   const rows = [
     h("tr", {
       key: t.id,
+      className: isSelected ? "selected" : undefined,
       onClick: () => !_forecast && onEditCategory && onEditCategory(t),
       style: _forecast
         ? { cursor: "default", opacity: 0.7, borderLeft: "2px dashed var(--warn)" }
-        : { cursor: "pointer" }
+        : { cursor: "pointer", background: isSelected ? "var(--accent-bg)" : undefined }
     },
-      cols.includes("date") && h("td", { className: "mono", style: { color: "var(--fg-3)", fontSize: 10 } }, fmtDateBR(t.date)),
+      cols.includes("select") && h("td", {
+        style: { width: 34, textAlign: "center", padding: "6px 4px 6px 10px" },
+        onClick: e => e.stopPropagation(),
+      },
+        !_forecast && h("input", {
+          type: "checkbox",
+          className: "tx-checkbox",
+          checked: !!isSelected,
+          onChange: e => onToggleSelect && onToggleSelect(t, e),
+          "aria-label": `Selecionar ${t.description || "lançamento"}`,
+        })
+      ),
+      cols.includes("date") && h("td", { className: "mono", style: { color: "var(--fg-1)", fontSize: 11, fontWeight: 600 } }, fmtDateBR(t.date)),
       cols.includes("desc") && h("td", { style: { maxWidth: cols.includes("account") ? 260 : "none" } },
         h("div", { style: { display: "flex", flexDirection: "column", gap: 2, overflow: "hidden" } },
           h("div", { style: { display: "flex", alignItems: "center", gap: 6, overflow: "hidden" } },
@@ -387,12 +416,12 @@ const TxRow = React.memo(({ t, cols, onEditCategory, onApplySuggestion, catsByFl
             isThirdParty && h("span", {
               className: "data-tag",
               "data-tip": t.category
-                ? `Em nome de terceiros · ${t.category} — fora de todos os seus totais`
+                ? `Em nome de terceiros · ${t.category}. fora de todos os seus totais.`
                 : window.BS.KIND_HINT[K.THIRD_PARTY],
               style: { borderStyle: "dashed", borderColor: "var(--warn)", color: "var(--warn)", fontWeight: 600, flexShrink: 0 },
-            }, t.category ? `EM NOME DE · ${t.category}` : "EM NOME DE TERCEIROS")
+            }, t.category ? `Em nome de terceiros · ${t.category}` : "Em nome de terceiros")
           ),
-          h("span", { style: { fontSize: 10, color: "var(--fg-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, t.description)
+          h("span", { style: { fontSize: 11, color: "var(--fg-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, t.description)
         )
       ),
       //> Terceiros fica FORA desta lista: é onde a categoria faz mais falta, porque
@@ -404,21 +433,23 @@ const TxRow = React.memo(({ t, cols, onEditCategory, onApplySuggestion, catsByFl
               className: "data-tag",
               "data-tip": window.BS.KIND_HINT[kind],
               style: {
-                borderColor: `color-mix(in oklch, ${window.BS.KIND_COLOR[kind]} 30%, transparent)`,
-                color: window.BS.KIND_COLOR[kind],
+                borderColor: kind === K.TRANSFER ? "var(--line-2)" : `color-mix(in oklch, ${window.BS.KIND_COLOR[kind]} 40%, transparent)`,
+                background: kind === K.TRANSFER ? "var(--bg-2)" : undefined,
+                color: kind === K.TRANSFER ? "var(--fg-0)" : window.BS.KIND_COLOR[kind],
+                fontWeight: 600,
                 borderStyle: _forecast ? "dashed" : undefined,
               },
-            }, { settlement: "pagamento de fatura", transfer: "transferência",
-                 invest: "investimento",
+            }, { settlement: "Pagamento de fatura", transfer: "Transferência",
+                 invest: "Investimento",
                  //> Parcela previsão diz de quantas é; recorrência sem prazo não
                  //> tem "de quantas", e inventar um total ali seria afirmar um fim.
                  forecast: t.installment_seq && t.installment_total
-                   ? `previsto · ${t.installment_seq}/${t.installment_total}`
-                   : t.forecast_kind === "recurring" ? "previsto · recorrente" : "previsto" }[kind])
+                   ? `Previsto · ${t.installment_seq}/${t.installment_total}`
+                   : t.forecast_kind === "recurring" ? "Previsto · Recorrente" : "Previsto" }[kind])
             : (onInlineCategory && catsByFlow)
 
               ? h("select", {
-                  value: t.category_id || "",
+                  disabled: true, value: t.category_id || "",
                   onClick: e => e.stopPropagation(),
                   onChange: e => { e.stopPropagation(); onInlineCategory(t, parseInt(e.target.value, 10)); },
                   style: { border: "2px solid var(--line-1)", background: "var(--bg-0)", fontFamily: "var(--ff-mono)", fontSize: 11, padding: "2px 4px", cursor: "pointer", color: "var(--fg-1)" },
@@ -430,6 +461,7 @@ const TxRow = React.memo(({ t, cols, onEditCategory, onApplySuggestion, catsByFl
                 ? h("span", {
                     className: "data-tag",
                     style: {
+                      fontWeight: 600,
                       ...(t.flow === "income" ? { borderColor: "color-mix(in oklch, var(--pos) 30%, transparent)", color: "var(--pos)" } : {}),
                     }
                   }, t.category)
@@ -437,29 +469,29 @@ const TxRow = React.memo(({ t, cols, onEditCategory, onApplySuggestion, catsByFl
 
                   ? h("button", {
                       className: "data-tag",
-                      "data-tip": `Sugerida do histórico — clique para aplicar "${t.suggested_category_name}"`,
-                      onClick: e => { e.stopPropagation(); onApplySuggestion(t); },
+                      "data-tip": `Sugerida do histórico. clique para aplicar "${t.suggested_category_name}".`,
+                      disabled: true, onClick: e => { e.stopPropagation(); onApplySuggestion(t); },
                       style: {
-                        borderStyle: "dashed", cursor: "pointer", background: "none",
-                        borderColor: "color-mix(in oklch, var(--accent) 45%, transparent)",
-                        color: "var(--accent)", fontFamily: "inherit",
+                        borderStyle: "dashed", cursor: "pointer", background: "var(--accent-bg)",
+                        borderColor: "var(--accent)", boxShadow: "1px 1px 0 0 #000",
+                        color: "var(--accent)", fontFamily: "inherit", fontWeight: 600,
                       },
                     }, `✓ ${t.suggested_category_name}?`)
                   : h("span", {
                       className: "data-tag",
-                      style: { borderStyle: "dashed", color: "var(--fg-3)" },
+                      style: { borderStyle: "dashed", color: "var(--fg-2)" },
                     }, t.flow === "expense" ? "Sem categoria" : "Receita")
       ),
       cols.includes("account") && h("td", null, h(BankChip, { accountId: t.account_id, bank: t.bank })),
-      cols.includes("method") && h("td", { className: "mono", style: { fontSize: 10, color: "var(--fg-2)", textTransform: "uppercase" } },
-        ({ pix: "PIX", pix_received: "PIX", credit: "CRÉDITO", ted: "TED", transfer: "TRANSF", debit: "DÉBITO", salary: "SALÁRIO", freelance: "FREELA" })[t.method] || t.method || "—"),
+      cols.includes("method") && h("td", { className: "mono", style: { fontSize: 11, color: "var(--fg-0)", fontWeight: 600, textTransform: "uppercase" } },
+        ({ pix: "PIX", pix_received: "PIX", credit: "CRÉDITO", ted: "TED", transfer: "TRANSFERÊNCIA", debit: "DÉBITO", salary: "SALÁRIO", freelance: "FREELANCE" })[t.method] || t.method || "—"),
       cols.includes("amount") && h("td", { className: "num" },
         h("div", { style: { display: "flex", justifyContent: "flex-end", width: "100%" } },
           h(Money, { t, size: amountSize })
         )
       ),
 
-      cols.includes("balance") && h("td", { className: "num mono", style: { fontSize: 10, color: "var(--fg-3)" } },
+      cols.includes("balance") && h("td", { className: "num mono", style: { fontSize: 11, color: "var(--fg-1)", fontWeight: 600 } },
         runningBalance == null ? "—" : fmtBRL(runningBalance)
       )
     )
@@ -483,7 +515,9 @@ const TxRow = React.memo(({ t, cols, onEditCategory, onApplySuggestion, catsByFl
   prev.onEditCategory === next.onEditCategory &&
   prev.onApplySuggestion === next.onApplySuggestion &&
   prev.catsByFlow === next.catsByFlow &&
-  prev.onInlineCategory === next.onInlineCategory
+  prev.onInlineCategory === next.onInlineCategory &&
+  prev.isSelected === next.isSelected &&
+  prev.onToggleSelect === next.onToggleSelect
 );
 
 const isConsumptionExpense = t => window.BS.moneyKind(t) === "expense";
@@ -507,9 +541,9 @@ function FilterBar({ filter, onRemove, onClear }) {
   return h("div", { className: "filter-bar" },
     chips.map(([kind, value, label]) => h("button", {
       key: kind + ":" + value, className: "filter-chip", onClick: () => onRemove(kind, value),
-      "data-tip": "Remover filtro",
+      "data-tip": "Remover filtro.",
     }, label, h("span", { className: "filter-chip-x" }, "×"))),
-    h("button", { className: "filter-chip filter-chip-clear", onClick: onClear }, "limpar tudo")
+    h("button", { className: "filter-chip filter-chip-clear", onClick: onClear }, "Limpar tudo")
   );
 }
 
